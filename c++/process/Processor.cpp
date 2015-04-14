@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#include <TlHelp32.h>
+
 #include "Processor.h"
 
 
@@ -23,10 +25,6 @@ CProcessor::CProcessor (void)
 	m_nMsgID			= 0;
 
 	m_bIsRunning		= FALSE;
-
-
-	// Thread Handle
-	m_hThread			= NULL;
 }
 
 
@@ -57,6 +55,7 @@ CProcessor::CProcessor (CString strCmd, CString strParam /*= _T("")*/, CWnd* pNo
  ************************************************************/
 CProcessor::~CProcessor (void)
 {
+	StopThread();
 }
 
 
@@ -131,7 +130,10 @@ BOOL CProcessor::Run (void)
  ************************************************************/
 BOOL CProcessor::RunAsync (void)
 {
-	// Processor Information 설정
+	m_Mutex.Lock();
+
+
+	// Processor Information 추가
 	PROCESSOR_INFO			procInfo;
 	
 	procInfo.m_strCmd		= m_strCmd;
@@ -142,43 +144,31 @@ BOOL CProcessor::RunAsync (void)
 
 	procInfo.m_nMsgID		= m_nMsgID;
 
-
-	// Processor Information 추가
-	m_Mutex.Lock();
-
 	m_ProcessorInfos.push_back (procInfo);
-
-	m_Mutex.Unlock();
 
 
 	// Thread 생성
-	m_Mutex.Lock();
+	HANDLE hThread = ::CreateThread(NULL, 0,(LPTHREAD_START_ROUTINE)RunProcess, (LPVOID)this, CREATE_SUSPENDED, NULL);
 
-	if (NULL == m_hThread)
+	if (NULL == hThread)
 	{
-		m_hThread = ::CreateThread(NULL, 0,(LPTHREAD_START_ROUTINE)RunProcess, (LPVOID)this, CREATE_SUSPENDED, NULL);
-
-		if (NULL == m_hThread)
+		// 프로세스 종료 메세지 발생
+		if (NULL != m_pNotify)
 		{
-			// 프로세스 종료 메세지 발생
-			if (NULL != m_pNotify)
-			{
-				m_pNotify->PostMessage(m_nMsgID);
-			}
-
-			m_Mutex.Unlock();
-
-			return FALSE;
+			m_pNotify->PostMessage(m_nMsgID);
 		}
 
-		ResumeThread (m_hThread);
+		m_Mutex.Unlock();
+
+		return FALSE;
 	}
 
+	ResumeThread (hThread);
+
+	m_ThreadHandles.push_back(hThread);
+
+
 	m_Mutex.Unlock();
-
-
-	// Process 실행
-	m_RunEvent.SetEvent ();
 
 
 	return TRUE;
@@ -203,7 +193,25 @@ BOOL CProcessor::IsRunning (void)
  ************************************************************/
 BOOL CProcessor::StopThread (void)
 {
-	m_StopEvent.SetEvent ();
+	// Kill Process
+	for (auto it = m_ProcessorIDs.begin(); it != m_ProcessorIDs.end(); it++)
+	{
+		KillProcess(*it);
+	}
+
+	m_ProcessorIDs.clear();
+
+
+	// Close Thread Handle
+	for (auto it = m_ThreadHandles.begin(); it != m_ThreadHandles.end(); it++)
+	{
+		WaitForSingleObject(*it, INFINITE);
+
+		CloseHandle(*it);
+	}
+
+	m_ThreadHandles.clear();
+
 
 	return TRUE;
 }
@@ -231,66 +239,33 @@ BOOL CProcessor::RunProcess (void)
 {
 	BOOL bResult	= TRUE;
 
-	// 이벤트 리스트
-	CSyncObject* EventList[2];
 
-	EventList[0]	= &m_RunEvent;
+	// Processor Information 취득
+	PROCESSOR_INFO	procInfo;
 
-	EventList[1]	= &m_StopEvent;
+	BOOL			bProcInfo	= FALSE;
 
-	// 이벤트 대기 리스트 작성
-	CMultiLock multiLock (&EventList[0], _countof (EventList));
 
-	for ( ; ; )
+	m_Mutex.Lock();
+
+	if (m_ProcessorInfos.size())
 	{
-		// 이벤트 대기
-		DWORD dwResult = multiLock.Lock(INFINITE, FALSE);
+		procInfo	= m_ProcessorInfos.front();
 
-		// Run Event
-		if (WAIT_OBJECT_0 == dwResult)
+		m_ProcessorInfos.pop_front();
+
+		bProcInfo	= TRUE;
+	}
+
+	m_Mutex.Unlock();
+
+
+	// Process 실행
+	if (bProcInfo)
+	{
+		if (FALSE == RunProcess (&procInfo))
 		{
-			for ( ; ; )
-			{
-				// Processor Information 취득
-				PROCESSOR_INFO*		pProcInfo		= NULL;
-
-				m_Mutex.Lock();
-
-				if (m_ProcessorInfos.size())
-				{
-					pProcInfo	= &m_ProcessorInfos.front();
-				}
-
-				m_Mutex.Unlock();
-
-
-				// Processor Information 없음
-				if (NULL == pProcInfo)
-				{
-					break;
-				}
-
-
-				// Process 실행
-				if (FALSE == RunProcess (pProcInfo))
-				{
-					bResult		= FALSE;
-				}
-
-
-				// Processor Information 삭제
-				m_Mutex.Lock();
-
-				m_ProcessorInfos.pop_front();
-
-				m_Mutex.Unlock();
-			}
-		}
-
-		// Stop Event
-		else
-		{
-			break;
+			bResult		= FALSE;
 		}
 	}
 
@@ -390,6 +365,10 @@ BOOL CProcessor::RunProcess (PROCESSOR_INFO* pProcInfo)
 	}
 
 
+	// 프로세스 ID 추가
+	m_ProcessorIDs.push_back(GetProcessId(pExecInfo->hProcess));
+
+
 	// 프로세스 종료 대기
 	WaitForSingleObject(pExecInfo->hProcess, INFINITE);
 
@@ -409,6 +388,180 @@ BOOL CProcessor::RunProcess (PROCESSOR_INFO* pProcInfo)
 
 	// 프로세스 실행 중 해제
 	m_bIsRunning = FALSE;
+
+
+	return TRUE;
+}
+
+
+/************************************************************
+ *	@brief		Is Process Run
+ *	@retval		없음
+ ************************************************************/
+BOOL CProcessor::IsProcessRun(LPCTSTR pszProcName)
+{
+	BOOL	bResult			= FALSE;
+
+	HANDLE	hProcessSnap	= INVALID_HANDLE_VALUE;
+
+
+	PROCESSENTRY32 pe32;
+
+    hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+
+    pe32.dwSize = sizeof(PROCESSENTRY32);
+
+    Process32First(hProcessSnap, &pe32);
+
+
+	while(Process32Next(hProcessSnap, &pe32))
+    {
+		if(!_tcsicmp(pszProcName, pe32.szExeFile))
+		{
+			bResult = TRUE;
+
+			break;
+		}
+	}
+
+
+	CloseHandle(hProcessSnap);
+
+
+	return bResult;
+}
+
+
+/************************************************************
+ *	@brief		Is Process Run
+ *	@retval		없음
+ ************************************************************/
+BOOL CProcessor::IsProcessRun(int nProcID)
+{
+	BOOL	bResult			= FALSE;
+
+	HANDLE	hProcessSnap	= INVALID_HANDLE_VALUE;;
+
+
+	PROCESSENTRY32 pe32;
+
+    hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+
+    pe32.dwSize = sizeof(PROCESSENTRY32);
+
+    Process32First(hProcessSnap, &pe32);
+
+
+	while(Process32Next(hProcessSnap, &pe32))
+    {
+		if(nProcID == pe32.th32ProcessID)
+		{
+			bResult = TRUE;
+
+			break;
+		}
+	}
+
+
+	CloseHandle(hProcessSnap);
+
+
+	return bResult;
+}
+
+
+/************************************************************
+ *	@brief		Kill Process
+ *	@retval		없음
+ ************************************************************/
+BOOL CProcessor::KillProcess(LPCTSTR pszProcName)
+{
+	HANDLE	hProcessSnap	= INVALID_HANDLE_VALUE;
+
+	HANDLE	hProcess		= INVALID_HANDLE_VALUE;
+
+
+	PROCESSENTRY32 pe32;
+
+    hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+
+    pe32.dwSize = sizeof(PROCESSENTRY32);
+
+    Process32First(hProcessSnap, &pe32);
+
+
+	while(Process32Next(hProcessSnap, &pe32))
+    {
+		if(!_tcsicmp(pszProcName, pe32.szExeFile))
+		{
+			hProcess = OpenProcess(PROCESS_TERMINATE, 0, pe32.th32ProcessID);
+
+			if (NULL == hProcess)
+			{
+				return FALSE;
+			}
+
+			if (FALSE == TerminateProcess(hProcess, 0))
+			{
+				return FALSE;
+			}
+		}
+	}
+
+
+	CloseHandle(hProcessSnap);
+
+	CloseHandle(hProcess);
+
+
+	return TRUE;
+}
+
+
+/************************************************************
+ *	@brief		Kill Process
+ *	@retval		없음
+ ************************************************************/
+BOOL CProcessor::KillProcess(int nProcID)
+{
+	HANDLE	hProcessSnap	= INVALID_HANDLE_VALUE;;
+
+	HANDLE	hProcess		= INVALID_HANDLE_VALUE;;
+
+
+	PROCESSENTRY32 pe32;
+
+	hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+
+	pe32.dwSize = sizeof(PROCESSENTRY32);
+
+	Process32First(hProcessSnap, &pe32);
+
+
+	while(Process32Next(hProcessSnap, &pe32))
+	{
+		if(nProcID == pe32.th32ProcessID)
+		{       
+			hProcess = OpenProcess(PROCESS_TERMINATE, 0, pe32.th32ProcessID);
+           
+			if (NULL == hProcess)
+			{
+				return FALSE;
+			}
+
+			if (FALSE == TerminateProcess(hProcess, 0))
+			{
+				return FALSE;
+			}
+
+			break;
+		}
+	}
+
+
+	CloseHandle(hProcessSnap);
+
+	CloseHandle(hProcess);
 
 
 	return TRUE;

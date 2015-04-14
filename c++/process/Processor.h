@@ -62,6 +62,20 @@ public:
 	BOOL StopThread (void);
 
 
+	// Is Process Run
+	static BOOL IsProcessRun(LPCTSTR pszProcName);
+
+	// Is Process Run
+	static BOOL IsProcessRun(int nProcID);
+
+
+	// Kill Process
+	static BOOL KillProcess(LPCTSTR pszProcName);
+
+	// Kill Process
+	static BOOL KillProcess(int nProcID);
+
+
 protected:
 	// Command
 	CString		m_strCmd;
@@ -82,13 +96,10 @@ protected:
 	std::list<PROCESSOR_INFO>	m_ProcessorInfos;
 
 	// Thread Handle
-	HANDLE		m_hThread;
+	std::list<HANDLE>			m_ThreadHandles;
 
-	// Run Event
-	CEvent		m_RunEvent;
-
-	// Stop Event
-	CEvent		m_StopEvent;
+	// Processor IDs
+	std::list<int>				m_ProcessorIDs;
 
 	// Mutex
 	CMutex		m_Mutex;
