@@ -1,5 +1,4 @@
-#if !defined DEBUGNEW_H
-#define DEBUGNEW_H
+#pragma once
 #pragma warning (disable:4786)
 
 void * operator new (size_t size, char const * file, int line);
@@ -15,17 +14,19 @@ private:
 	class Entry
 	{
 	public:
-		Entry (char const * file, int line)
-			: _file (file), _line (line)
+		Entry (char const * file, int line, size_t size)
+			: _file (file), _line (line), _size (size)
 		{}
 		Entry ()
-			: _file (0), _line (0)
+			: _file (0), _line (0), _size (0)
 		{}
 		char const * File () const { return _file; }
 		int Line () const { return _line; }
+		size_t Size () const { return _size; }
 	private:
 		char const * _file;
 		int _line;
+		size_t _size;
 	};
 	class Lock
 	{
@@ -47,7 +48,7 @@ private:
 public:
 	Tracer ();
 	~Tracer ();
-	void Add (void * p, char const * file, int line);
+	void Add (void * p, char const * file, int line, size_t size);
 	void Remove (void * p);
 	void Dump ();
 
@@ -59,9 +60,4 @@ private:
 
 	std::map<void *, Entry> _map;
 	int _lockCount;
-
 };
-
-extern Tracer NewTrace;
-
-#endif

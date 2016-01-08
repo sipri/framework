@@ -1,11 +1,5 @@
-#if !defined DBNEW_H
-#define DBNEW_H
+#pragma once
 
-#if !defined NDEBUG
 #include "debugnew.h"
 
 #define new new(__FILE__, __LINE__)
-
-#endif
-
-#endif

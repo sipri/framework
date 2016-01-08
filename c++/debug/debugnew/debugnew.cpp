@@ -1,9 +1,9 @@
 #include "debugnew.h"
 #include <sstream>
 #include <new>
-#include <windows.h> // OutputDebugString
+#include <windows.h>
 
-#if !defined NDEBUG
+Tracer NewTrace;
 
 bool Tracer::Ready = false;
 
@@ -11,7 +11,7 @@ void * operator new (size_t size, char const * file, int line)
 {
 	void * p = malloc (size);
 	if (Tracer::Ready)
-		NewTrace.Add (p, file, line);
+		NewTrace.Add (p, file, line, size);
 	return p;
 }
 
@@ -26,7 +26,7 @@ void * operator new (size_t size)
 {
 	void * p = malloc (size);
 	if (Tracer::Ready)
-		NewTrace.Add (p, "?", 0);
+		NewTrace.Add (p, "?", 0, size);
 	return p;
 }
 
@@ -49,12 +49,12 @@ Tracer::~Tracer ()
 	Dump ();
 }
 
-void Tracer::Add (void * p, char const * file, int line)
+void Tracer::Add (void * p, char const * file, int line, size_t size)
 {
 	if (_lockCount > 0)
 		return;
 	Tracer::Lock lock (*this);
-	_map [p] = Entry (file, line);
+	_map [p] = Entry (file, line, size);
 }
 
 void Tracer::Remove (void * p)
@@ -77,23 +77,21 @@ void Tracer::Dump ()
 {
 	if (_map.size () != 0)
 	{
-		::OutputDebugString ("*** Memory leak(s):\n");
 		for (iterator it = _map.begin (); it != _map.end (); ++it)
 		{
 			char const * file = it->second.File ();
 			int line = it->second.Line ();
+			size_t size = it->second.Size ();
 			int addr = reinterpret_cast<int> (it->first);
 			std::stringstream out;
-			//out << "0x" << std::hex << addr << ": " 
-			//	<< file << ", line " << std::dec << line << std::endl;
 			char buffer1 [10];
 			char buffer2 [8];
-			out << "0x" << itoa (addr, buffer1, 16) << ": "
-				<< file << ", line " << itoa (line, buffer2, 10) << std::endl;
+			char buffer3 [64];
+			out << "*** Memory leak : 0x" << itoa (addr, buffer1, 16) << ": "
+				<< file
+				<< ", line " << itoa (line, buffer2, 10)
+				<< ", size " << itoa (size, buffer3, 10) << std::endl;
 			::OutputDebugString (out.str ().c_str ());
 		}
-		::OutputDebugString ("\n");
 	}
 }
-
-#endif
