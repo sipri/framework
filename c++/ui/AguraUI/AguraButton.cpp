@@ -25,11 +25,15 @@ static char THIS_FILE[] = __FILE__;
 // ----------------------------------------------------------------------------
 CAguraButton::CAguraButton()
 {
-	m_bHover			= false;
+	m_bIsFile			= TRUE;
+	m_bIsCaptionFile	= TRUE;
+	m_bHover			= FALSE;
 	m_bIsPressed		= FALSE;
 	m_bIsFocused		= FALSE;
 	m_bIsDisabled		= FALSE;
-	m_bMouseOnButton	= FALSE;
+//	m_bMouseOnButton	= FALSE;
+
+	m_iImagePosition	= eNone;
 	
 	// By default icon is aligned horizontally
 	m_byAlign = 0;
@@ -43,10 +47,10 @@ CAguraButton::CAguraButton()
 	// Invalid value, since type still unknown
 	m_nTypeStyle = SKINBTN_TYPEMASK1;
 
-	m_ptBitmapOrg.x = 0;
-	m_ptBitmapOrg.y = 0;
-	m_ptIconOrg.x = 0;
-	m_ptIconOrg.y = 0;
+// 	m_ptBitmapOrg.x = 0;
+// 	m_ptBitmapOrg.y = 0;
+// 	m_ptIconOrg.x = 0;
+// 	m_ptIconOrg.y = 0;
 
 	m_strNormalPath.Empty();
 	m_strClickPath.Empty();
@@ -96,7 +100,7 @@ END_MESSAGE_MAP()
 void CAguraButton::OnMouseMove(UINT nFlags, CPoint point)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-	if (m_bHover == false)
+	if (m_bHover == FALSE)
 	{
  		TRACKMOUSEEVENT t;
  		t.cbSize = sizeof(t);
@@ -104,7 +108,7 @@ void CAguraButton::OnMouseMove(UINT nFlags, CPoint point)
  		t.hwndTrack = GetSafeHwnd();
  		t.dwHoverTime = 0x00000001;
 		_TrackMouseEvent(&t);
-		m_bHover = true;
+		m_bHover = TRUE;
 		Invalidate(FALSE);
 	}
 
@@ -124,7 +128,7 @@ void CAguraButton::OnMouseMove(UINT nFlags, CPoint point)
 void CAguraButton::OnMouseLeave()
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-	m_bHover = false;
+	m_bHover = FALSE;
 	Invalidate(FALSE);
 	CButton::OnMouseLeave();
 }
@@ -142,30 +146,46 @@ void CAguraButton::OnMouseLeave()
 void CAguraButton::DrawItem(LPDRAWITEMSTRUCT lpDIS)
 {
 	CDC *pDC(CDC::FromHandle(lpDIS->hDC));
-	CFont *poldFont = pDC->SelectObject(GetFont());
-
+//	CFont *poldFont = pDC->SelectObject(GetFont());
+	
 	m_bIsPressed = (lpDIS->itemState & ODS_SELECTED);
 	m_bIsFocused  = (lpDIS->itemState & ODS_FOCUS);
 	m_bIsDisabled = (lpDIS->itemState & ODS_DISABLED);
 
 	CRect captionRect = lpDIS->rcItem;
+	CRect rtOrigin = captionRect;
 
-	pDC->FillSolidRect(captionRect, m_clrBK);
+	CDC memDC;
+	CBitmap memBmp;
+	CBitmap* pOldBmp;
+	CFont *pOldFont;
 
-	Graphics graphics(*pDC);
+	memDC.CreateCompatibleDC(pDC);
+	memBmp.CreateCompatibleBitmap(pDC, captionRect.Width(), captionRect.Height());
+
+	pOldBmp = memDC.SelectObject(&memBmp);
+	pOldFont = memDC.SelectObject(GetFont());
+
+	memDC.FillSolidRect(captionRect, m_clrBK);
+
+	Graphics graphics(memDC);
 	_bstr_t str;
+	int iResource;
 
 	if (m_bIsPressed == TRUE)
 	{
 		str = m_strClickPath;
+		iResource = m_iClickResource;
 	}
-	else if (m_bHover == true)
+	else if (m_bHover == TRUE)
 	{
 		str = m_strHoverPath;
+		iResource = m_iHoverResource;
 	}
 	else
 	{
 		str = m_strNormalPath;
+		iResource = m_iNoramlResource;
 	}
 
 	REAL rTransparency = 0.5f;    // 0.1f ~ 1.0f
@@ -177,55 +197,137 @@ void CAguraButton::DrawItem(LPDRAWITEMSTRUCT lpDIS)
 		0.0f, 0.0f, 0.0f, 0.0f, 1.0f};
 
 	ImageAttributes imageAttr;
-	Image image(str);
+	Bitmap* pBitmap;
+
+	if (m_bIsFile == TRUE)
+		pBitmap = Bitmap::FromFile(str);
+	else
+		pBitmap = Bitmap::FromResource(AfxGetInstanceHandle(), (WCHAR*)MAKEINTRESOURCE(iResource));
+
 	imageAttr.SetColorMatrix(&colorMatrix, ColorMatrixFlagsDefault, ColorAdjustTypeBitmap);
 
-	if (m_bIsPressed)
+	if (pBitmap->GetLastStatus() == Gdiplus::Ok)
 	{
-		graphics.DrawImage(&image, 0, 0, captionRect.Width(), captionRect.Height());
-	}
-	else
-	{
-		if(m_bIsDisabled)
+		if (m_bIsPressed)
 		{
-			graphics.DrawImage(&image, Rect(0, 0, captionRect.Width(), captionRect.Height()), 0, 0, image.GetWidth(), image.GetHeight(), UnitPixel, &imageAttr);	
+			graphics.DrawImage(pBitmap, 0, 0, captionRect.Width(), captionRect.Height());
 		}
 		else
 		{
-			graphics.DrawImage(&image, 0, 0, captionRect.Width(), captionRect.Height());
+			if(m_bIsDisabled)
+			{
+				graphics.DrawImage(pBitmap, Rect(0, 0, captionRect.Width(), captionRect.Height()), 0, 0, pBitmap->GetWidth(), pBitmap->GetHeight(), UnitPixel, &imageAttr);	
+			}
+			else
+			{
+				graphics.DrawImage(pBitmap, 0, 0, captionRect.Width(), captionRect.Height());
+			}
 		}
+	}
+	else
+	{
+		Pen pen(Color(40, 70, 84), 1);
+		graphics.DrawRectangle(&pen, captionRect.left, captionRect.top, captionRect.Width() - 1, captionRect.Height() - 1);
 	}
 
 	CString sTitle = _T(" ");
-	GetWindowText(sTitle);	
+	GetWindowText(sTitle);
+
+	if( m_bIsPressed)	captionRect.OffsetRect(0, 1);
+
+	// Draw Image
+	if (m_iImagePosition == eLeft)
+	{
+		CRect rtTemp = captionRect;
+		captionRect.OffsetRect(20, 0);
+
+		Bitmap* pBitmapCaption;
+
+		if (m_bIsCaptionFile == TRUE)
+			pBitmapCaption = Bitmap::FromFile(m_strCaptionPath);
+		else
+			pBitmapCaption = Bitmap::FromResource(AfxGetInstanceHandle(), (WCHAR*)MAKEINTRESOURCE(m_iCaptionResource));
+
+		if (pBitmapCaption->GetLastStatus() == Gdiplus::Ok)
+		{
+			rtTemp.InflateRect(-10, 0, -10, 0);
+
+			int iHeight = 17;
+			int iWidth = iHeight * pBitmapCaption->GetWidth() / pBitmapCaption->GetHeight();
+
+			captionRect.OffsetRect(iWidth, 0);
+			
+			graphics.DrawImage(pBitmapCaption, rtTemp.left, rtTemp.top + (rtTemp.Height() - iHeight) / 2, iWidth, iHeight);
+		}
+
+		delete pBitmapCaption;
+	}
+	else if (m_iImagePosition == eCenter)
+	{
+		Bitmap* pBitmapCaption;
+
+		if (m_bIsCaptionFile == TRUE)
+			pBitmapCaption = Bitmap::FromFile(m_strCaptionPath);
+		else
+			pBitmapCaption = Bitmap::FromResource(AfxGetInstanceHandle(), (WCHAR*)MAKEINTRESOURCE(m_iCaptionResource));
+
+		if (pBitmapCaption->GetLastStatus() == Gdiplus::Ok)
+		{
+			CRect rtTemp = captionRect;
+			captionRect.top = rtTemp.top + captionRect.Height() / 3 * 2;
+			rtTemp.bottom = captionRect.top;
+
+			rtTemp.InflateRect(-10, -10, -10, 0);
+			int iWidth = rtTemp.Width();
+			int iHeight = rtTemp.Height();
+
+			if ((iHeight / pBitmapCaption->GetHeight()) > (iWidth / pBitmapCaption->GetWidth()))
+			{
+				iHeight = iWidth * pBitmapCaption->GetHeight() / pBitmapCaption->GetWidth();
+			}
+			else
+			{
+				iWidth = iHeight * pBitmapCaption->GetWidth() / pBitmapCaption->GetHeight();
+			}
+
+			graphics.DrawImage(pBitmapCaption, rtTemp.left + (rtTemp.Width() - iWidth) / 2, rtTemp.top, iWidth, iHeight);
+		}
+
+		delete pBitmapCaption;
+	}
 
 	// Write the button title
 	if( sTitle.IsEmpty() == FALSE )
 	{		
-		if( m_bIsPressed)
-			captionRect.OffsetRect(1, 1);
+		DWORD dwFormat = m_iImagePosition != eLeft ? DT_CENTER : DT_LEFT;
+		dwFormat |= DT_WORDBREAK | DT_VCENTER | DT_SINGLELINE;
 
 		// Center text
 		CRect centerRect = captionRect;
-		pDC->DrawText(sTitle, -1, captionRect, DT_WORDBREAK | DT_CENTER | DT_CALCRECT);
-		captionRect.OffsetRect((centerRect.Width() - captionRect.Width())/2, (centerRect.Height() - captionRect.Height())/2);
-		pDC->SetBkMode(TRANSPARENT);
-
+		memDC.SetBkMode(TRANSPARENT);
+ 
 		if(m_bIsDisabled)
 		{
-			captionRect.OffsetRect(0, 0);
-			pDC->SetTextColor(::GetSysColor(COLOR_3DSHADOW));
-			pDC->DrawText(sTitle, -1, captionRect, DT_WORDBREAK | DT_CENTER);
+			memDC.SetTextColor(::GetSysColor(COLOR_3DSHADOW));
+			memDC.DrawText(sTitle, -1, captionRect, dwFormat);
 		}
-		else
-		{
-			pDC->SetTextColor(m_clrText);
-			pDC->DrawText(sTitle, -1, captionRect, DT_WORDBREAK | DT_CENTER);
-		}
+ 		else
+ 		{
+ 			memDC.SetTextColor(m_clrText);
+ 			memDC.DrawText(sTitle, -1, captionRect, dwFormat);
+ 		}
 	}
 
-	pDC->SelectObject(poldFont);
-	
+
+	pDC->BitBlt(0, 0, rtOrigin.Width(), rtOrigin.Height(), &memDC, 0, 0, SRCCOPY);
+
+	memDC.SelectObject(pOldFont);
+	memDC.SelectObject(pOldBmp);
+
+	memBmp.DeleteObject();
+	memDC.DeleteDC();
+
+	delete pBitmap;	
 }
 // ========================================
 //	1. 함 수 명 : PreTranslateMessage(MSG* pMsg)
@@ -264,9 +366,47 @@ DWORD CAguraButton::SetDefaultColors(BOOL bRepaint)
 	if( bRepaint )	Invalidate();
 
 	return 0;
-} 
+}
+
 // ========================================
-//	1. 함 수 명 : vSetButtonImage(CString strNormal, CString strHover, CString strClick)
+//	1. 함 수 명 : setCaptionImage(CString strCaption)
+//	2. 기    능 : 버튼 이미지를 추가한다. 
+//	3. 전달인자 : BOOL bRepaint 새로 그려질지에 대한 TRUE/FALSE
+//	4. 반 환 값 : DWORD
+//	5. 작 성 일 : 2013/06/05
+//	6. 작 성 자 : 송산호
+//	7. 수정기록 
+//  8. 참    고
+//				
+// ----------------------------------------------------------------------------
+void CAguraButton::setCaptionImage(int iPosition, CString strCaption)
+{
+	m_iImagePosition = iPosition;
+	m_strCaptionPath = strCaption;
+
+	m_bIsCaptionFile = TRUE;
+}
+
+// ========================================
+//	1. 함 수 명 : setCaptionImage(CString strCaption)
+//	2. 기    능 : 버튼 이미지를 추가한다. 
+//	3. 전달인자 : BOOL bRepaint 새로 그려질지에 대한 TRUE/FALSE
+//	4. 반 환 값 : DWORD
+//	5. 작 성 일 : 2013/06/05
+//	6. 작 성 자 : 송산호
+//	7. 수정기록 
+//  8. 참    고
+//				
+// ----------------------------------------------------------------------------
+void CAguraButton::setCaptionImage(int iPosition, int iCaption)
+{
+	m_iImagePosition = iPosition;
+	m_iCaptionResource = iCaption;
+
+	m_bIsCaptionFile = FALSE;
+}
+// ========================================
+//	1. 함 수 명 : setButtonImage(CString strNormal, CString strHover, CString strClick)
 //	2. 기    능 : 버튼 이미지를 추가한다. 
 //	3. 전달인자 : BOOL bRepaint 새로 그려질지에 대한 TRUE/FALSE
 //	4. 반 환 값 : DWORD
@@ -277,14 +417,36 @@ DWORD CAguraButton::SetDefaultColors(BOOL bRepaint)
 //				
 // ----------------------------------------------------------------------------
 /*LDRA_INSPECTED 65 D*/
-void CAguraButton::vSetButtonImage(CString strNormal, CString strHover, CString strClick)
+void CAguraButton::setButtonImage(CString strNormal, CString strHover, CString strClick)
 {
 	m_strNormalPath	= strNormal;
 	m_strHoverPath	= strHover;
 	m_strClickPath	= strClick;
+
+	m_bIsFile = TRUE;
+}
+
+// ========================================
+//	1. 함 수 명 : setButtonImage(int iNormal, int iHover, int iClick)
+//	2. 기    능 : 버튼 이미지를 추가한다. 
+//	3. 전달인자 : BOOL bRepaint 새로 그려질지에 대한 TRUE/FALSE
+//	4. 반 환 값 : DWORD
+//	5. 작 성 일 : 2013/06/05
+//	6. 작 성 자 : 송산호
+//	7. 수정기록 
+//  8. 참    고
+//				
+// ----------------------------------------------------------------------------
+void CAguraButton::setButtonImage(int iNormal, int iHover, int iClick)
+{
+	m_iNoramlResource	= iNormal;
+	m_iHoverResource	= iHover;
+	m_iClickResource	= iClick;
+
+	m_bIsFile = FALSE;
 }
 // ========================================
-//	1. 함 수 명 : vSetButtonColor(COLORREF clrBK, COLORREF clrText)
+//	1. 함 수 명 : setButtonColor(COLORREF clrBK, COLORREF clrText)
 //	2. 기    능 : 버튼의 색상을 인자값의 RGB로 변경한다. 
 //	3. 전달인자 : BOOL bRepaint 새로 그려질지에 대한 TRUE/FALSE
 //	4. 반 환 값 : DWORD
@@ -295,7 +457,7 @@ void CAguraButton::vSetButtonImage(CString strNormal, CString strHover, CString 
 //				
 // ----------------------------------------------------------------------------
 /*LDRA_INSPECTED 65 D*/
-void CAguraButton::vSetButtonColor(COLORREF clrBK, COLORREF clrText)
+void CAguraButton::setButtonColor(COLORREF clrBK, COLORREF clrText)
 {
 	m_clrBK = clrBK;
 	m_clrText = clrText;	

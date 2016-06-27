@@ -13,6 +13,9 @@ IMPLEMENT_DYNAMIC(CAguraDlgBlue, CDialog)
 CAguraDlgBlue::CAguraDlgBlue(UINT nIDTemplate, CWnd* pParent /*=NULL*/)
 : CDialog(nIDTemplate, pParent)
 {
+	GdiplusStartupInput gdiplusStartupInput;
+	GdiplusStartup(&m_gdiplusToken, &gdiplusStartupInput, NULL);
+
 	m_strTitle = _T("Dialog");
 	m_bIsMax = FALSE;
 	m_bMove = FALSE;
@@ -26,6 +29,9 @@ CAguraDlgBlue::CAguraDlgBlue(UINT nIDTemplate, CWnd* pParent /*=NULL*/)
 CAguraDlgBlue::CAguraDlgBlue(CWnd* pParent /*=NULL*/)
 	: CDialog(CAguraDlgBlue::IDD, pParent)
 {
+	GdiplusStartupInput gdiplusStartupInput;
+	GdiplusStartup(&m_gdiplusToken, &gdiplusStartupInput, NULL);
+
 	m_strTitle = _T("Dialog");
 	m_bIsMax = FALSE;
 	m_bMove = FALSE;
@@ -86,9 +92,10 @@ BOOL CAguraDlgBlue::OnInitDialog()
 		strH.Format(_T("Image\\%sC.png"), sa.GetAt(i));
 		strC.Format(_T("Image\\%sC.png"), sa.GetAt(i));
 
-		m_pBtn[i]->vSetButtonImage(strN, strH, strC);
-		m_pBtn[i]->vSetButtonColor(RGB(13, 27, 34), RGB(255, 255, 255));
+		m_pBtn[i]->setButtonImage(strN, strH, strC);
+		m_pBtn[i]->setButtonColor(RGB(13, 27, 34), RGB(255, 255, 255));
 	}
+
 
 	CRect rtDlg;
 
@@ -253,13 +260,13 @@ BOOL CAguraDlgBlue::OnCommand(WPARAM wParam, LPARAM lParam)
 		case 2000 + eMax:
 			if (m_bIsMax == FALSE)
 			{
-				m_pBtn[eMax]->vSetButtonImage(_T("Image\\RestoreN.png"), _T("Image\\RestoreC.png"), _T("Image\\RestoreC.png"));
+				m_pBtn[eMax]->setButtonImage(_T("Image\\RestoreN.png"), _T("Image\\RestoreC.png"), _T("Image\\RestoreC.png"));
 				ShowWindow(SW_MAXIMIZE);
 				m_bIsMax = TRUE;
 			}
 			else
 			{
-				m_pBtn[eMax]->vSetButtonImage(_T("Image\\MaxN.png"), _T("Image\\MaxC.png"), _T("Image\\MaxC.png"));
+				m_pBtn[eMax]->setButtonImage(_T("Image\\MaxN.png"), _T("Image\\MaxC.png"), _T("Image\\MaxC.png"));
 				ShowWindow(SW_RESTORE);
 				m_bIsMax = FALSE;
 			}

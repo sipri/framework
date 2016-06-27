@@ -17,17 +17,28 @@ using namespace Gdiplus;
 class CAguraButton : public CMFCButton
 {
 public:
+	enum IMG {eNone, eLeft, eCenter};
+
     CAguraButton();
 	~CAguraButton();
 
-	bool	m_bHover;
-	POINT	m_ptBitmapOrg;
-	POINT	m_ptIconOrg;
+	BOOL	m_bIsFile;
+	BOOL	m_bIsCaptionFile;
+	BOOL	m_bHover;
+	int		m_iImagePosition;
+// 	POINT	m_ptBitmapOrg;
+// 	POINT	m_ptIconOrg;
 	POINT	m_ptPressedOffset;
 
 	CString m_strNormalPath;
 	CString m_strHoverPath;
 	CString m_strClickPath;
+	CString	m_strCaptionPath;
+
+	int		m_iNoramlResource;
+	int		m_iHoverResource;
+	int		m_iClickResource;
+	int		m_iCaptionResource;
 
 	COLORREF m_clrBK;
 	COLORREF m_clrText;
@@ -36,13 +47,19 @@ public:
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	DWORD SetDefaultColors(BOOL bRepaint = TRUE);
-	void vSetButtonImage(CString strNormal, CString strHover, CString strClick);
-	void vSetButtonColor(COLORREF clrBK, COLORREF clrText);
+
+	void setCaptionImage(int iPosition, CString strCaption);
+	void setCaptionImage(int iPosition, int iCaption);
+
+	void setButtonImage(CString strNormal, CString strHover, CString strClick);
+	void setButtonImage(int iNormal, int iHover, int iClick);
+
+	void setButtonColor(COLORREF clrBK, COLORREF clrText);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnMouseLeave();
 
 protected:
-	BOOL		m_bMouseOnButton;				// Is mouse over the button?
+//	BOOL		m_bMouseOnButton;				// Is mouse over the button?
 	BOOL		m_bIsPressed;					// Is button pressed?
 	BOOL		m_bIsFocused;					// Is button focused?
 	BOOL		m_bIsDisabled;					// Is button disabled?
