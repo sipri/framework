@@ -17,13 +17,17 @@ CAguraDlgBlue::CAguraDlgBlue(UINT nIDTemplate, CWnd* pParent /*=NULL*/)
 	GdiplusStartup(&m_gdiplusToken, &gdiplusStartupInput, NULL);
 
 	m_strTitle = _T("Dialog");
-	m_bIsMax = FALSE;
-	m_bMove = FALSE;
+	m_bIsMax		= FALSE;
+	m_bMove			= FALSE;
+	m_pFont			= NULL;
 
 	for (int i = eMin; i <= eExit; ++i)
 	{
 		m_pBtn[i] = NULL;
 	}
+
+	HMODULE hUser32 = GetModuleHandle(_T("USER32.DLL"));
+	SetLayeredWindowAttributes = (lpfn)GetProcAddress(hUser32, "SetLayeredWindowAttributes");
 }
 
 CAguraDlgBlue::CAguraDlgBlue(CWnd* pParent /*=NULL*/)
@@ -31,6 +35,8 @@ CAguraDlgBlue::CAguraDlgBlue(CWnd* pParent /*=NULL*/)
 {
 	GdiplusStartupInput gdiplusStartupInput;
 	GdiplusStartup(&m_gdiplusToken, &gdiplusStartupInput, NULL);
+
+	DeleteObject(m_hbr);
 
 	m_strTitle = _T("Dialog");
 	m_bIsMax = FALSE;
@@ -61,9 +67,11 @@ void CAguraDlgBlue::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CAguraDlgBlue, CDialog)
 	ON_WM_PAINT()
 	ON_WM_SIZE()
+	ON_WM_CTLCOLOR()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONUP()
+	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
 
@@ -107,6 +115,8 @@ BOOL CAguraDlgBlue::OnInitDialog()
 		m_pBtn[i]->MoveWindow(iLeft + (SYS_BTN_CX * i) + (5 * i), rtDlg.top + 7, SYS_BTN_CX, SYS_BTN_CY);
 	}
 
+	m_fontStatic.CreatePointFont(100, _T("굴림"));
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
 }
@@ -118,6 +128,49 @@ BOOL CAguraDlgBlue::PreTranslateMessage(MSG* pMsg)
 		return TRUE;
 
 	return CDialog::PreTranslateMessage(pMsg);
+}
+
+// ========================================
+//	1. 함 수 명 : OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+//	2. 기    능 : 컨트롤 색상 변경
+//	3. 전달인자 : CDC* pDC, CWnd* pWnd, UINT nCtlColor
+//	4. 반 환 값 : HBRUSH
+//	5. 작 성 일 : 2013/05/30
+//	6. 작 성 자 : 송산호
+//	7. 수정기록 
+//  8. 참    고
+//				
+// ----------------------------------------------------------------------------
+HBRUSH CAguraDlgBlue::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	DeleteObject(m_hbr);
+
+	switch(nCtlColor)
+	{
+	case CTLCOLOR_STATIC:
+		if (m_pFont != NULL)	pDC->SelectObject(m_pFont);
+		m_pFont = pDC->SelectObject(&m_fontStatic);
+		pDC->SetTextColor(RGB(255, 0, 0));
+		pDC->SetBkMode(TRANSPARENT);
+//		pDC->SetBkColor(DLG_FRAME_COLOR);				// 배경을 투명으로
+		m_hbr = (HBRUSH)::GetStockObject(NULL_BRUSH);
+		break;
+	case CTLCOLOR_EDIT:
+		pDC->SetTextColor(DLG_TEXT_COLOR);
+		pDC->SetBkColor(DLG_CTRL_COLOR);
+		m_hbr = (HBRUSH)::CreateSolidBrush(DLG_CTRL_COLOR);
+		break;
+	case CTLCOLOR_LISTBOX:
+		pDC->SetTextColor(DLG_TEXT_COLOR);
+		pDC->SetBkColor(DLG_CTRL_COLOR);
+		m_hbr = (HBRUSH)::CreateSolidBrush(DLG_CTRL_COLOR);
+		break;
+	default:
+		m_hbr = CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+	}
+
+	// TODO:  기본값이 적당하지 않으면 다른 브러시를 반환합니다.
+	return m_hbr;
 }
 
 void CAguraDlgBlue::OnPaint()
@@ -216,6 +269,10 @@ void CAguraDlgBlue::OnLButtonDown(UINT nFlags, CPoint point)
 		m_bMove = TRUE;
 		m_ptStandard = point;
 		SetCapture();
+
+		::SetWindowLong(m_hWnd, GWL_EXSTYLE, GetWindowLong(m_hWnd, GWL_EXSTYLE) ^ WS_EX_LAYERED);
+		SetLayeredWindowAttributes(m_hWnd, 0, 176, LWA_ALPHA);
+		::RedrawWindow(m_hWnd, NULL, NULL, RDW_ERASE | RDW_INVALIDATE | RDW_FRAME | RDW_ALLCHILDREN);
 	}
 
 	CDialog::OnLButtonDown(nFlags, point);
@@ -243,6 +300,9 @@ void CAguraDlgBlue::OnLButtonUp(UINT nFlags, CPoint point)
 	{
 		ReleaseCapture();
 		m_bMove = FALSE;
+
+		::SetWindowLong(m_hWnd, GWL_EXSTYLE, GetWindowLong(m_hWnd, GWL_EXSTYLE) & ~WS_EX_LAYERED);
+		::RedrawWindow(m_hWnd, NULL, NULL, RDW_ERASE | RDW_INVALIDATE | RDW_FRAME | RDW_ALLCHILDREN);
 	}
 
 	CDialog::OnLButtonUp(nFlags, point);
@@ -323,4 +383,14 @@ void CAguraDlgBlue::DrawTextBackgroundLight(CDC& pDC,int x,int y,CString str)
 
 	pDC.SetTextColor(iTextColor);
 	pDC.SetBkMode(iBkMode);
+}
+
+
+BOOL CAguraDlgBlue::OnEraseBkgnd(CDC* pDC)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+
+	return 0;
+
+//	return CDialog::OnEraseBkgnd(pDC);
 }
