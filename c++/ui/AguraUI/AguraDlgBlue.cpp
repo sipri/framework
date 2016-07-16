@@ -78,7 +78,7 @@ BOOL CAguraDlgBlue::OnInitDialog()
 		m_pBtn[i]->MoveWindow(iLeft + (SYS_BTN_CX * i) + (5 * i), rtDlg.top + 7, SYS_BTN_CX, SYS_BTN_CY);
 	}
 
-	m_fontStatic.CreatePointFont(100, _T("±¼¸²"));
+	m_fontStatic.CreatePointFont(AGURA_FONT_SIZE, AGURA_FONT_NAME);
 
 	return TRUE;
 }
