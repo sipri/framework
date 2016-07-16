@@ -6,10 +6,6 @@
 #define SYS_BTN_CX	18
 #define SYS_BTN_CY	18
 
-#define DLG_TEXT_COLOR RGB(255, 255, 255)
-#define DLG_CTRL_COLOR RGB(48, 48, 48)
-#define DLG_FRAME_COLOR RGB(38, 38, 38)
-
 typedef BOOL (WINAPI *lpfn) (HWND hWnd, COLORREF cr, BYTE bAlpha, DWORD dwFlags);
 
 class CAguraDlgBlue : public CDialog
@@ -38,7 +34,6 @@ public:
 	lpfn				SetLayeredWindowAttributes;
 
 	virtual BOOL OnInitDialog();
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	afx_msg void OnPaint();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);

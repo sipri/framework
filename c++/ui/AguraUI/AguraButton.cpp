@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "AguraButton.h"
+#include "AguraConfig.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -356,8 +357,8 @@ BOOL CAguraButton::PreTranslateMessage(MSG* pMsg)
 // ----------------------------------------------------------------------------
 DWORD CAguraButton::SetDefaultColors(BOOL bRepaint)
 {
-	m_clrBK = RGB(12, 37, 48);
-	m_clrText = RGB(255, 255, 255);
+	m_clrBK = AGURA_COLOR_BACK;
+	m_clrText = AGURA_COLOR_TEXT;
 
 	if( bRepaint )	Invalidate();
 
