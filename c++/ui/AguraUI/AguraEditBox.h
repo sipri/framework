@@ -1,16 +1,6 @@
-#if !defined(AFX_AGURAEDITBOX_H__2E11CFFF_9B31_4C70_BCF0_CD681692808D__INCLUDED_)
-#define AFX_AGURAEDITBOX_H__2E11CFFF_9B31_4C70_BCF0_CD681692808D__INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
-// AguraEditBox.h : header file
-//
 
 extern UINT NEAR WM_AGURAEDITBOX_CHANGE;
-
-/////////////////////////////////////////////////////////////////////////////
-// CAguraEditBox window
 
 class CAguraEditBox : public CEdit
 {
@@ -60,10 +50,3 @@ protected:
 
 	DECLARE_MESSAGE_MAP()	
 };
-
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_AGURAEDITBOX_H__2E11CFFF_9B31_4C70_BCF0_CD681692808D__INCLUDED_)

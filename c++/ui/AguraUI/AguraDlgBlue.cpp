@@ -1,21 +1,23 @@
-// AguraDlgBlue.cpp : 구현 파일입니다.
-//
-
 #include "stdafx.h"
-#include "testDialog.h"
 #include "AguraDlgBlue.h"
 
-
-// CAguraDlgBlue 대화 상자입니다.
+using namespace Gdiplus;
 
 IMPLEMENT_DYNAMIC(CAguraDlgBlue, CDialog)
+
+BEGIN_MESSAGE_MAP(CAguraDlgBlue, CDialog)
+	ON_WM_PAINT()
+	ON_WM_SIZE()
+	ON_WM_CTLCOLOR()
+	ON_WM_LBUTTONDOWN()
+	ON_WM_MOUSEMOVE()
+	ON_WM_LBUTTONUP()
+	ON_WM_ERASEBKGND()
+END_MESSAGE_MAP()
 
 CAguraDlgBlue::CAguraDlgBlue(UINT nIDTemplate, CWnd* pParent /*=NULL*/)
 : CDialog(nIDTemplate, pParent)
 {
-	GdiplusStartupInput gdiplusStartupInput;
-	GdiplusStartup(&m_gdiplusToken, &gdiplusStartupInput, NULL);
-
 	m_strTitle = _T("Dialog");
 	m_bIsMax		= FALSE;
 	m_bMove			= FALSE;
@@ -30,52 +32,13 @@ CAguraDlgBlue::CAguraDlgBlue(UINT nIDTemplate, CWnd* pParent /*=NULL*/)
 	SetLayeredWindowAttributes = (lpfn)GetProcAddress(hUser32, "SetLayeredWindowAttributes");
 }
 
-CAguraDlgBlue::CAguraDlgBlue(CWnd* pParent /*=NULL*/)
-	: CDialog(CAguraDlgBlue::IDD, pParent)
-{
-	GdiplusStartupInput gdiplusStartupInput;
-	GdiplusStartup(&m_gdiplusToken, &gdiplusStartupInput, NULL);
-
-	DeleteObject(m_hbr);
-
-	m_strTitle = _T("Dialog");
-	m_bIsMax = FALSE;
-	m_bMove = FALSE;
-
-	for (int i = eMin; i <= eExit; ++i)
-	{
-		m_pBtn[i] = NULL;
-	}
-}
-
 CAguraDlgBlue::~CAguraDlgBlue()
 {
-	GdiplusShutdown(m_gdiplusToken);
-
 	for (int i = eMin; i <= eExit; ++i)
 	{
 		delete m_pBtn[i];
 	}
 }
-
-void CAguraDlgBlue::DoDataExchange(CDataExchange* pDX)
-{
-	CDialog::DoDataExchange(pDX);
-}
-
-
-BEGIN_MESSAGE_MAP(CAguraDlgBlue, CDialog)
-	ON_WM_PAINT()
-	ON_WM_SIZE()
-	ON_WM_CTLCOLOR()
-	ON_WM_LBUTTONDOWN()
-	ON_WM_MOUSEMOVE()
-	ON_WM_LBUTTONUP()
-	ON_WM_ERASEBKGND()
-END_MESSAGE_MAP()
-
-
-// CAguraDlgBlue 메시지 처리기입니다.
 
 BOOL CAguraDlgBlue::OnInitDialog()
 {
@@ -150,7 +113,7 @@ HBRUSH CAguraDlgBlue::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	case CTLCOLOR_STATIC:
 		if (m_pFont != NULL)	pDC->SelectObject(m_pFont);
 		m_pFont = pDC->SelectObject(&m_fontStatic);
-		pDC->SetTextColor(RGB(255, 0, 0));
+		pDC->SetTextColor(DLG_TEXT_COLOR);
 		pDC->SetBkMode(TRANSPARENT);
 //		pDC->SetBkColor(DLG_FRAME_COLOR);				// 배경을 투명으로
 		m_hbr = (HBRUSH)::GetStockObject(NULL_BRUSH);
@@ -244,7 +207,6 @@ void CAguraDlgBlue::OnSize(UINT nType, int cx, int cy)
 {
 	CDialog::OnSize(nType, cx, cy);
 
-	// TODO: 여기에 메시지 처리기 코드를 추가합니다.
 	if (m_pBtn[eMin] != NULL)
 	{
 		CRect rtDlg;
@@ -263,7 +225,6 @@ void CAguraDlgBlue::OnSize(UINT nType, int cx, int cy)
 
 void CAguraDlgBlue::OnLButtonDown(UINT nFlags, CPoint point)
 {
-	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	if (m_rtTitle.PtInRect(point) == TRUE && m_bIsMax == FALSE)
 	{
 		m_bMove = TRUE;
@@ -280,7 +241,6 @@ void CAguraDlgBlue::OnLButtonDown(UINT nFlags, CPoint point)
 
 void CAguraDlgBlue::OnMouseMove(UINT nFlags, CPoint point)
 {
-	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	if (m_bMove == TRUE)
 	{
 		CRect rt;
@@ -295,7 +255,6 @@ void CAguraDlgBlue::OnMouseMove(UINT nFlags, CPoint point)
 
 void CAguraDlgBlue::OnLButtonUp(UINT nFlags, CPoint point)
 {
-	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
 	if (m_bMove == TRUE)
 	{
 		ReleaseCapture();
@@ -385,12 +344,7 @@ void CAguraDlgBlue::DrawTextBackgroundLight(CDC& pDC,int x,int y,CString str)
 	pDC.SetBkMode(iBkMode);
 }
 
-
 BOOL CAguraDlgBlue::OnEraseBkgnd(CDC* pDC)
 {
-	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-
 	return 0;
-
-//	return CDialog::OnEraseBkgnd(pDC);
 }

@@ -1,17 +1,7 @@
-#if !defined(AFX_AguraSpinBox_H__94AF797E_D6F6_442A_BE80_E964CEB27EFC__INCLUDED_)
-#define AFX_AguraSpinBox_H__94AF797E_D6F6_442A_BE80_E964CEB27EFC__INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
-// AguraSpinBox.h : header file
-//
 
 extern UINT NEAR WM_AGURASPINBOX_CHANGING;
 extern UINT NEAR WM_AGURASPINBOX_DELTA;
-
-/////////////////////////////////////////////////////////////////////////////
-// CAguraSpinBox window
 
 class CAguraSpinBox : public CSpinButtonCtrl
 {
@@ -49,10 +39,3 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
-
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_AguraSpinBox_H__94AF797E_D6F6_442A_BE80_E964CEB27EFC__INCLUDED_)

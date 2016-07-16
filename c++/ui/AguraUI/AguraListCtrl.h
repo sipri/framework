@@ -12,9 +12,6 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef XLISTCTRL_H
-#define XLISTCTRL_H
-
 #include "AguraHeaderCtrl.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -432,9 +429,3 @@ protected:
 public:
 	afx_msg void OnLvnInsertitem(NMHDR *pNMHDR, LRESULT *pResult);
 };
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif //XLISTCTRL_H

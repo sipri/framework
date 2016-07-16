@@ -1,18 +1,4 @@
-
-#ifndef _SKINBUTTON_H
-#define _SKINBUTTON_H
-
-#if _MSC_VER >= 1000
 #pragma once
-#endif // _MSC_VER >= 1000
-
-#include <GdiPlus.h>
-#include <comutil.h>
-
-#pragma comment(lib, "gdiplus")
-#pragma comment(lib, "comsuppw.lib")
-
-using namespace Gdiplus;
 
 class CAguraButton : public CMFCButton
 {
@@ -42,7 +28,6 @@ public:
 
 	COLORREF m_clrBK;
 	COLORREF m_clrText;
-	ULONG_PTR m_gdiplusToken;
 
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
@@ -80,5 +65,3 @@ private:
 	/*LDRA_INSPECTED 326 S */
 	DECLARE_MESSAGE_MAP() //매크로 부분으로 예외처리 
 };
-
-#endif//_SKINBUTTON_H

@@ -1,14 +1,5 @@
-#if !defined(AFX_AGURACOMBOBOX_H__05957708_2213_4285_AF31_211F3A09A31A__INCLUDED_)
-#define AFX_AGURACOMBOBOX_H__05957708_2213_4285_AF31_211F3A09A31A__INCLUDED_
-
-#if _MSC_VER > 1000
 #pragma once
-#endif // _MSC_VER > 1000
-// AguraComboBox.h : header file
-//
 
-/////////////////////////////////////////////////////////////////////////////
-// CAguraComboBox window
 extern UINT NEAR WM_AGURACOMBOBOX_CHANGE;
 
 class CAguraComboBox : public CComboBox
@@ -52,10 +43,3 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
-
-/////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_AGURACOMBOBOX_H__05957708_2213_4285_AF31_211F3A09A31A__INCLUDED_)

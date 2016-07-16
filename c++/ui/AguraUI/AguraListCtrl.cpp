@@ -2595,7 +2595,7 @@ void CAguraListCtrl::SetRowHeight(int nRowHeight)
 	logfont.lfClipPrecision	= CLIP_DEFAULT_PRECIS;
 	logfont.lfQuality		= PROOF_QUALITY;
 	logfont.lfPitchAndFamily= DEFAULT_PITCH;
-	_tcscpy(logfont.lfFaceName, _T("System"));
+	_tcscpy_s(logfont.lfFaceName, _T("System"));
 	font.CreateFontIndirect(&logfont);
 
 	SetFont(&font);

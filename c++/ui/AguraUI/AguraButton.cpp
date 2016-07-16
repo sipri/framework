@@ -3,9 +3,9 @@
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
 #endif
+
+using namespace Gdiplus;
 
 /////////////////////////////////////////////////////////////////////////////
 // CAguraButton
@@ -55,9 +55,6 @@ CAguraButton::CAguraButton()
 	m_strNormalPath.Empty();
 	m_strClickPath.Empty();
 	m_strHoverPath.Empty();
-
-	GdiplusStartupInput gdiplusStartupInput;
-	GdiplusStartup(&m_gdiplusToken, &gdiplusStartupInput, NULL);
 }
 // ========================================
 //	1. ÇÔ ¼ö ¸í : ~CAguraButton()
@@ -72,7 +69,6 @@ CAguraButton::CAguraButton()
 // ----------------------------------------------------------------------------
 CAguraButton::~CAguraButton()
 {
-	GdiplusShutdown(m_gdiplusToken);	
 }
 
 BEGIN_MESSAGE_MAP(CAguraButton, CButton)

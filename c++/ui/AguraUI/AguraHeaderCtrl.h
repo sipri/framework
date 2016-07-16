@@ -10,11 +10,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef AGURAHEADERCTRL_H
-#define AGURAHEADERCTRL_H
-
 #include <tchar.h>
-//#include "MemDC.h"
 
 #define FLATHEADER_TEXT_MAX	80
 
@@ -124,10 +120,3 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
-
-///////////////////////////////////////////////////////////////////////////////
-
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif //AGURAHEADERCTRL_H
