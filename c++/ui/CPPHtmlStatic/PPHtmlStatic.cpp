@@ -99,7 +99,7 @@ void CPPHtmlStatic::PreSubclassWindow()
 	CFont* pFont = GetFont();
 	HFONT hFont = NULL;
 	//ENG: Gets a default system font
-	//RUS: Получаем системный шрифт по-умолчанию
+	//RUS: Получаем системны?шриф?по-умолчани?
 	if (NULL == hFont)
 	{
 		hFont = (HFONT)::GetStockObject(DEFAULT_GUI_FONT);
@@ -419,7 +419,7 @@ void CPPHtmlStatic::OnPaint()
 	} //switch
 
 	//ENG: A placement of the output area
-	//RUS: Положение области вывода по отношению к клиентским координатам
+	//RUS: Положени?област?вывода по отношени??клиентским координата?
 	m_rcArea.SetRect(pt.x, pt.y, pt.x + size.cx, pt.y + size.cy);
 
 	RepaintWindow(dc.GetSafeHdc());
@@ -478,7 +478,7 @@ void CPPHtmlStatic::RepaintWindow(HDC hDC /* = NULL */)
 {
 	TRACE("CPPHtmlStatic::RepaintWindow()\n");
 	//ENG: If device context not passed
-	//RUS: Если контекст устройства не передавался, то получаем его и устанавливаем признак автоматического удаления
+	//RUS: Если контекст устройства не передавался, то получаем ег??устанавливае?призна?автоматическог?удален?
 	BOOL bAutoReleaseDC = FALSE;
 	if (NULL == hDC)
 	{
@@ -490,7 +490,7 @@ void CPPHtmlStatic::RepaintWindow(HDC hDC /* = NULL */)
 	GetClientRect(&rcClient);
 
 	//ENG: Creates memory context
-	//RUS: Создаем контекст устройства в памяти
+	//RUS: Создае?контекст устройства ?па?ти
 	HDC hMemDC = ::CreateCompatibleDC(hDC);
 	HDC hBkDC = ::CreateCompatibleDC(hDC);
 	HBITMAP hOldBkBitmap = (HBITMAP)::SelectObject(hBkDC, m_hBitmapBk);
@@ -498,7 +498,7 @@ void CPPHtmlStatic::RepaintWindow(HDC hDC /* = NULL */)
 	HBITMAP hOldBitmap = (HBITMAP)::SelectObject(hMemDC, hBitmap);
 
 	//ENG: Copy background to the temporary bitmap
-	//RUS: Копируем фон под тултипом в память
+	//RUS: Копируем фо?по?тултипом ?па?ть
 	::BitBlt(hMemDC, 0, 0, rcClient.Width(), rcClient.Height(), hBkDC, 0, 0, SRCCOPY);
 
 	CRect rcOutput = m_rcArea;
@@ -518,7 +518,7 @@ void CPPHtmlStatic::RepaintWindow(HDC hDC /* = NULL */)
 		::SelectClipRgn(hDC, m_hRgn);
 	
 	//ENG: Output a tooltip to the screen
-	//RUS: Выводим тултип на экран
+	//RUS: Выводи?тултип на экра?
 	::BitBlt(hDC, 0, 0, rcClient.Width(), rcClient.Height(), hMemDC, 0, 0, SRCCOPY);
 
 	if (NULL != m_hRgn)
@@ -531,7 +531,7 @@ void CPPHtmlStatic::RepaintWindow(HDC hDC /* = NULL */)
 		::FrameRect(hDC, rcClient, m_hbrBorder);
 	
 	//ENG: Free resources
-	//RUS: Освобождаем задействованные ресурсы
+	//RUS: Освобождае?задействованны?ресурс?
 	::SelectObject(hBkDC, hOldBkBitmap);
 	::SelectObject(hMemDC, hOldBitmap);
 	::DeleteObject(hBitmap);
@@ -539,7 +539,7 @@ void CPPHtmlStatic::RepaintWindow(HDC hDC /* = NULL */)
 	::DeleteDC(hMemDC);
 
 	//ENG: Releases device context if needed
-	//RUS: Освобождаем контекст устройства если это необходимо
+	//RUS: Освобождае?контекст устройства если эт?необходимо
 	if (bAutoReleaseDC)
 		::ReleaseDC(this->GetSafeHwnd(), hDC);
 }
@@ -884,14 +884,14 @@ void CPPHtmlStatic::SetTextColor(COLORREF clrText /*= -1*/)
 
 void CPPHtmlStatic::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 {
-	MessageBox("OnHScroll");
+	MessageBox(_T("OnHScroll"));
 	
 	CStatic::OnHScroll(nSBCode, nPos, pScrollBar);
 }
 
 void CPPHtmlStatic::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 {
-	MessageBox("OnVScroll");
+	MessageBox(_T("OnVScroll"));
 	
 	CStatic::OnVScroll(nSBCode, nPos, pScrollBar);
 }

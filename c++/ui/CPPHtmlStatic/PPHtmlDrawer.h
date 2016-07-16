@@ -338,7 +338,7 @@ protected:
 #pragma pack(1)
 	typedef struct _STRUCT_CALLBACK
 	{
-		HWND		hWnd;			/* Дескриптор окна, принимающего сообщение */
+		HWND		hWnd;			/* Дескриптор окна, принимающего сообщени?*/
 		UINT		nMessage;		// Message identifier
 		WPARAM		wParam;
 		LPARAM		lParam;

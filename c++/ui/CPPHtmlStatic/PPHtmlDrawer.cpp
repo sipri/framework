@@ -215,7 +215,8 @@ HBITMAP CPPHtmlDrawer::GetBitmapFromDll(DWORD dwID, LPCTSTR lpszPathDll /* = NUL
 
 CPPString CPPHtmlDrawer::GetStringFromResource(DWORD dwID) const
 {
-	if (0 == dwID) return _T("");
+	if (0 == dwID)
+		return _T("");
 
 	CPPString str;
 	str.LoadString(dwID);
@@ -225,7 +226,8 @@ CPPString CPPHtmlDrawer::GetStringFromResource(DWORD dwID) const
 
 CPPString CPPHtmlDrawer::GetStringFromDll(DWORD dwID, LPCTSTR lpszPathDll /* = NULL */) const
 {
-	if (0 == dwID) return _T("");
+	if (0 == dwID)
+		return _T("");
 
 	CPPString str = _T("");
 
@@ -382,14 +384,14 @@ void CPPHtmlDrawer::ReplaceSpecChars()
 	if (!m_bEnableEscapeSequences)
 	{
 		//ENG: Remove escape sequences
-		//RUS: Удаляем специальные символы
+		//RUS: Удаляем специальны?символ?
 		m_csHtmlText.Remove(_T('\n'));
 		m_csHtmlText.Remove(_T('\t'));
 	}
 	else
 	{
 		//ENG: Replace escape sequences to HTML tags
-		//RUS: Заменяем специальные символы HTML тэгами
+		//RUS: Заме?ем специальны?символ?HTML тэгами
 		m_csHtmlText.Replace(_T("\n"), _T("<br>"));
 		m_csHtmlText.Replace(_T("\t"), _T("<t>"));
 	} //if
@@ -842,7 +844,6 @@ HINSTANCE CPPHtmlDrawer::GotoURL(LPCTSTR url, int showcmd /* = SW_SHOW */)
     // If it failed, get the .htm regkey and lookup the program
     if ((UINT)result <= HINSTANCE_ERROR) 
 	{
-
         if (GetRegKey(HKEY_CLASSES_ROOT, _T(".htm"), key) == ERROR_SUCCESS) 
 		{
             lstrcat(key, _T("\\shell\\open\\command"));
@@ -892,8 +893,7 @@ LONG CPPHtmlDrawer::GetRegKey(HKEY key, LPCTSTR subkey, LPTSTR retdata)
 /////////////////////////////////////////////////////////////////
 void CPPHtmlDrawer::DrawHtml (LPSIZE lpSize, LPCRECT lpRect)
 {
-	//ENG: Bounding rectangle of a current area for output
-	//RUS: Ограничивающей прямоугольник для текущей области вывода
+	// Bounding rectangle of a current area for output
 	RECT rcArea;
 	rcArea.left = lpRect->left;
 	rcArea.right = lpRect->right;
@@ -905,14 +905,13 @@ void CPPHtmlDrawer::DrawHtml (LPSIZE lpSize, LPCRECT lpRect)
 	
 	if (MODE_FIRSTPASS == m_nNumPass)
 	{
-		//ENG: In preparing mode clears an auxiliary tables
-		//RUS: В режиме подготовки очищаем вспомогательные таблицы 
+		// In preparing mode clears an auxiliary tables
 		m_arrLinks.clear();
 //		m_arrTable.clear();
 		m_arrHtmlLine.clear();
 //		m_arrTableSizes.clear();
 		m_arrAni.clear();
-	} //if
+	}
 
 	m_nCurLine = 0;
 	m_nCurTable = -1;
@@ -920,21 +919,18 @@ void CPPHtmlDrawer::DrawHtml (LPSIZE lpSize, LPCRECT lpRect)
 	m_nCurIndexLink = -1;
 	m_nCurIndexAni = -1;
 	
-	//ENG: Clear stack of tags
-	//RUS: Очищаем стэк тэгов
+	// Clear stack of tags
 	m_arrStack.clear();
 	
 	int nIndex = 0;
 	int nBegin;
 	CPPString strText;
 	
-	//ENG: Applies a default styles
-	//RUS: Применяем стили по-умолчанию
+	// Applies a default styles
 	SetDefaultStyles(m_defStyle);
 	SelectNewHtmlStyle(_T("body"), m_defStyle);
 	
-	//ENG: Creates a default font
-	//RUS: Создаем шрифт по умолчанию
+	// Creates a default font
 	m_lfDefault.lfHeight = m_defStyle.nSizeFont;
 	m_lfDefault.lfWidth = 0;
 	m_lfDefault.lfOrientation = 0;
@@ -948,11 +944,11 @@ void CPPHtmlDrawer::DrawHtml (LPSIZE lpSize, LPCRECT lpRect)
 	m_lfDefault.lfClipPrecision = CLIP_DEFAULT_PRECIS;
 	m_lfDefault.lfQuality = DEFAULT_QUALITY;
 	m_lfDefault.lfPitchAndFamily = FF_DONTCARE;
-	_tcscpy (m_lfDefault.lfFaceName, m_defStyle.sFaceFont);
+	_tcscpy_s(m_lfDefault.lfFaceName, m_defStyle.sFaceFont);
 	m_hFont = ::CreateFontIndirect(&m_lfDefault);
 	
 	//ENG: Remember a current context setting
-	//RUS: Запоминаем текущие настройки контекст устройства
+	//RUS: Запоминаем текущи?настройк?контекст устройства
 	m_hOldFont = (HFONT)::SelectObject(m_hDC, m_hFont);
 	m_nOldBkMode = ::SetBkMode(m_hDC, m_defStyle.nBkMode);
 	m_crOldText = ::SetTextColor(m_hDC, m_defStyle.crText);
@@ -962,28 +958,28 @@ void CPPHtmlDrawer::DrawHtml (LPSIZE lpSize, LPCRECT lpRect)
 	while (nIndex < m_csHtmlText.GetLength())
 	{
 		//ENG: Searching a begin of table
-		//RUS: Ищем начало таблицы
+		//RUS: Ищем начало таблиц?
 		nBegin = nIndex;
 		BOOL bFoundTable = SearchTag(m_csHtmlText, nIndex, _T("table"));
 
 		//ENG: Gets a text before a table
-		//RUS: Получаем текст до таблицы
+		//RUS: Получаем текс?до таблиц?
 		strText = m_csHtmlText.Mid(nBegin, nIndex - nBegin);
 
 		//ENG: If text before a table is exist
-		//RUS: Если текст перед таблицей существует
+		//RUS: Если текс?пере?таблицей существует
 		if (!strText.IsEmpty())
 		{
 			//ENG: Add a tag BODY around of a output text
-			//RUS: Добавляем тэг BODY вокруг выводимого текста
+			//RUS: Добавляем тэ?BODY вокруг выводимого текста
 //			strText = _T("<body>") + strText + _T("</body>");
 
 			//ENG: Output a text before of a table
-			//RUS: Выводим текст перед таблицей
+			//RUS: Выводи?текс?пере?таблицей
 			szArea = DrawHtmlString(strText, &rcArea);
 
 			//ENG: Updates a output area size
-			//RUS: Обновляем размер области вывода
+			//RUS: Обновляем размер област?вывода
 			lpSize->cx = max(lpSize->cx, szArea.cx);
 			lpSize->cy += szArea.cy;
 			if (MODE_DRAW == m_nNumPass)
@@ -991,25 +987,25 @@ void CPPHtmlDrawer::DrawHtml (LPSIZE lpSize, LPCRECT lpRect)
 		} //if
 		
 		//ENG: If table was found
-		//RUS: Если таблица была найдена
+		//RUS: Если таблиц?была найден?
 		if (bFoundTable)
 		{
 			//ENG: Searching an end of the table
-			//RUS: Ищем окончание таблицы
+			//RUS: Ищем окончани?таблиц?
 			nBegin = nIndex;
 			nIndex += 6;
 			SearchEndOfTable(m_csHtmlText, nIndex);
 
 			//ENG: Cuts a text of a table
-			//RUS: Вырезаем текст таблицы
+			//RUS: Вырезаем текс?таблиц?
 			strText = m_csHtmlText.Mid(nBegin, nIndex - nBegin);
 
 			//ENG: Output a table
-			//RUS: Вывод таблицы
+			//RUS: Выво?таблиц?
 			szArea = DrawHtmlTable(strText, &rcArea);
 			
 			//ENG: Updates a output area size
-			//RUS: Обновляем размер области вывода
+			//RUS: Обновляем размер област?вывода
 			lpSize->cx = max(lpSize->cx, szArea.cx);
 			lpSize->cy += szArea.cy;
 			if (MODE_DRAW == m_nNumPass)
@@ -1018,18 +1014,18 @@ void CPPHtmlDrawer::DrawHtml (LPSIZE lpSize, LPCRECT lpRect)
 	} //while
 	
 	//ENG: Restore context setting
-	//RUS: Восстанавливаем настроки контекста устройства
+	//RUS: Восстанавливае?настроки контекст?устройства
 	::SetBkMode(m_hDC, m_nOldBkMode);
 	::SetBkColor(m_hDC, m_crOldBk);
 	::SetTextColor(m_hDC, m_crOldText);
 	::SelectObject(m_hDC, m_hOldFont);
 	
 	//ENG: Clear stack of tags
-	//RUS: Очищаем стэк тэгов
+	//RUS: Очищае?стэк тэго?
 	m_arrStack.clear();
 	
 	//ENG: Delete a font
-	//RUS: Удаляем шрифт
+	//RUS: Удаляем шриф?
 	::DeleteObject(m_hFont);
 } //End of DrawHtml
 
@@ -1037,7 +1033,7 @@ void CPPHtmlDrawer::DrawHtml (LPSIZE lpSize, LPCRECT lpRect)
 SIZE CPPHtmlDrawer::DrawHtmlTable (CPPString & sTable, LPCRECT lpRect)
 {
 	//ENG: Jump to the next table
-	//RUS: Начинаем новую таблицу
+	//RUS: Начинаем нову?таблиц?
 	m_nCurTable++;
 
 	int i;
@@ -1050,7 +1046,7 @@ SIZE CPPHtmlDrawer::DrawHtmlTable (CPPString & sTable, LPCRECT lpRect)
 	if (MODE_FIRSTPASS == m_nNumPass) 
 	{
 		//ENG: Get size of the table
-		//RUS: Получаем размеры таблицы
+		//RUS: Получаем размер?таблиц?
 		szTable = GetTableDimensions(sTable);
 		
 		STRUCT_TABLE st;
@@ -1065,7 +1061,7 @@ SIZE CPPHtmlDrawer::DrawHtmlTable (CPPString & sTable, LPCRECT lpRect)
 		sc.bFixedWidth = FALSE;
 	
 		//ENG: Creates a template of an empty table
-		//RUS: Создаем шаблон пустой таблицы
+		//RUS: Создае?шаблон пустой таблиц?
 		vecRow rows;
 		for (i = 0; i < szTable.cx; i++)
 		{
@@ -1080,12 +1076,12 @@ SIZE CPPHtmlDrawer::DrawHtmlTable (CPPString & sTable, LPCRECT lpRect)
 		} //for
 		
 		//ENG: Add a new table
-		//RUS: Добавляем новую таблицу
+		//RUS: Добавляем нову?таблиц?
 		m_arrTables.push_back(st);
 	} //if
 
 	//ENG: Gets an info about a current table
-	//RUS: Взять информацию о текущей таблице 
+	//RUS: Взять информацию ?текуще?таблиц?
 	int nIndexTable = m_nCurTable;
 	STRUCT_TABLE cur_table = m_arrTables [nIndexTable];
 	
@@ -1093,27 +1089,27 @@ SIZE CPPHtmlDrawer::DrawHtmlTable (CPPString & sTable, LPCRECT lpRect)
 	szTable.cy = cur_table.height.size();
 
 	//ENG: Applies styles of <table> tag
-	//RUS: Применяем стили таблицы (тэг <table>)
+	//RUS: Применяем стил?таблиц?(тэ?<table>)
 	m_defStyle.strTag = _T("table");
 	StoreRestoreStyle(FALSE);
 	SelectNewHtmlStyle(m_defStyle.strTag, m_defStyle);
 	
 	//ENG: Passes a tag body and get a properties of the tag
-	//RUS: Пропускаем тэг начала ячейки и получаем строку свойств тэга
+	//RUS: Пропускаем тэ?начала ячейк??получаем строку свойст?тэга
 	int nIndex = 0;
 	CPPString sTag;
 	SearchNextTag(sTable, sTag, nIndex);
 	CPPString sProperties = SplitTag(sTag);
 
 	//ENG: Analyses a properties of the tag
-	//RUS: Анализируем свойства тэга
+	//RUS: Анализируе?свойства тэга
 	AnalyseCellParam(sProperties, m_defStyle, TRUE);
 	UpdateContext();
 
 	if (MODE_FIRSTPASS != m_nNumPass)
 	{
 		//ENG: Gets a real size of the table
-		//RUS: Получаем реальные размеры таблицы
+		//RUS: Получаем реальные размер?таблиц?
 		rcTable.left = lpRect->left;
 		rcTable.top = rcTable.bottom = lpRect->top;
 
@@ -1136,12 +1132,12 @@ SIZE CPPHtmlDrawer::DrawHtmlTable (CPPString & sTable, LPCRECT lpRect)
 		} //if
 
 		//ENG: Horizontal align of the table
-		//RUS: Выравнивание таблицы по горизонтали
+		//RUS: Выравнивание таблиц?по горизонтал?
 		int nRealWidth = lpRect->right - lpRect->left;
 
 		if (nWidthTable < nRealWidth)
 		{
-			//RUS: Попытаемся растянуть таблицу на всю доступную область
+			//RUS: Попытаем? растянуть таблиц?на вс?доступну?област?
 			int nDelta = nRealWidth - nWidthTable;
 			int nNotFixedColumns = 0;
 			for (pos = 0; pos < cur_table.fixed_width.size(); ++pos)
@@ -1239,23 +1235,23 @@ SIZE CPPHtmlDrawer::DrawHtmlTable (CPPString & sTable, LPCRECT lpRect)
 		for (i = 0; i < szTable.cy; ++i)
 		{
 			//ENG: Searching a begin of the row
-			//RUS: Поиск начала строки
+			//RUS: Поис?начала строки
 			if (SearchTag(sTable, nNewRow, _T("tr")))
 			{
 				//ENG: The begin of the row was found. Searching end of the row
-				//RUS: Начало строки найдено. Ищем окончание строки
+				//RUS: Начало строки найден? Ищем окончани?строки
 				nEndRow = nNewRow;
 				SearchEndOfRow(sTable, nEndRow);
 				//ENG: The end of the row was found
-				//RUS: Окончание строки найдено
+				//RUS: Окончани?строки найден?
 				sRow = sTable.Mid(nNewRow, nEndRow - nNewRow);
 				
 				//ENG: Draw a row of the table
-				//RUS: Выводим строку таблицы
+				//RUS: Выводи?строку таблиц?
 				DrawHtmlTableRow(sRow, &rcRow, cur_table, i);
 				
 				//ENG: Jump to char after the end of the row
-				//RUS: Перемещаемся на символ, следующий за окончанием строки
+				//RUS: Перемещаем? на символ, следующи?за окончанием строки
 				nNewRow = nEndRow + 5;
 			} //if
 		} //for
@@ -1264,7 +1260,7 @@ SIZE CPPHtmlDrawer::DrawHtmlTable (CPPString & sTable, LPCRECT lpRect)
 	if (MODE_DRAW != m_nNumPass)
 	{
 		//ENG: Analysing cell's width
-		//RUS: Анализ ширины ячейки
+		//RUS: Анализ ширины ячейк?
 		for (i = 1; i <= szTable.cx; i++)
 		{
 			for (int y = 0; y < szTable.cy; y++)
@@ -1295,7 +1291,7 @@ SIZE CPPHtmlDrawer::DrawHtmlTable (CPPString & sTable, LPCRECT lpRect)
 							{
 								int step = (sc.szCell.cx - span_width) / i;
 								cur_table.width [x + i - 1] += (sc.szCell.cx - span_width) % i;
-								for (z = 0; z < i; z++)
+								for (int z = 0; z < i; z++)
 									cur_table.width [x + z] += step;
 							} //if
 						} //if
@@ -1305,7 +1301,7 @@ SIZE CPPHtmlDrawer::DrawHtmlTable (CPPString & sTable, LPCRECT lpRect)
 		} //for
 
 		//ENG: Analysing cell's height
-		//RUS: Анализ высоты ячейки
+		//RUS: Анализ высоты ячейк?
 		for (i = 1; i <= szTable.cy; i++)
 		{
 			for (int y = 0; y < szTable.cy; y++)
@@ -1328,7 +1324,7 @@ SIZE CPPHtmlDrawer::DrawHtmlTable (CPPString & sTable, LPCRECT lpRect)
 							{
 								int step = (sc.szCell.cy - span_height) / i;
 								cur_table.height [y] += (sc.szCell.cy - span_height) % i;
-								for (z = 0; z < i; z++)
+								for (int z = 0; z < i; z++)
 									cur_table.height [y + z] += step;
 							} //if
 						} //if
@@ -1364,11 +1360,11 @@ SIZE CPPHtmlDrawer::DrawHtmlTable (CPPString & sTable, LPCRECT lpRect)
 	} //if
 
 	//ENG: Stores a current table
-	//RUS: Сохраняем текущую таблицу
+	//RUS: Сохраняем текущу?таблиц?
 	m_arrTables [nIndexTable] = cur_table;
 
 	//ENG: Restore styles before <table> tag
-	//RUS: Восстанавливаем стили до тэга <table>
+	//RUS: Восстанавливае?стил?до тэга <table>
 	m_defStyle.strTag = _T("table");
 	if (StoreRestoreStyle(TRUE))
 		UpdateContext();
@@ -1391,7 +1387,7 @@ SIZE CPPHtmlDrawer::DrawHtmlTable (CPPString & sTable, LPCRECT lpRect)
 void CPPHtmlDrawer::DrawHtmlTableRow(CPPString & sRow, LPCRECT lpRect, STRUCT_TABLE & st, int nRow)
 {
 	//ENG: Applies styles of <tr> tag
-	//RUS: Применяем стили строки (тэг <tr>)
+	//RUS: Применяем стил?строки (тэ?<tr>)
 	m_defStyle.strTag = _T("tr");
 	StoreRestoreStyle(FALSE);
 	SelectNewHtmlStyle(m_defStyle.strTag, m_defStyle);
@@ -1401,14 +1397,14 @@ void CPPHtmlDrawer::DrawHtmlTableRow(CPPString & sRow, LPCRECT lpRect, STRUCT_TA
 	vecRow & row = st.cells [nRow];
 	
 	//ENG: Passes a tag body and get a properties of the tag
-	//RUS: Пропускаем тэг начала ячейки и получаем строку свойств тэга
+	//RUS: Пропускаем тэ?начала ячейк??получаем строку свойст?тэга
 	int nIndex = 0;
 	CPPString sTag;
 	SearchNextTag(sRow, sTag, nIndex);
 	CPPString sProperties = SplitTag(sTag);
 
 	//ENG: Analyses a properties of the tag
-	//RUS: Анализируем свойства тэга
+	//RUS: Анализируе?свойства тэга
 	AnalyseCellParam(sProperties, m_defStyle, FALSE);
 	UpdateContext();
 	
@@ -1417,13 +1413,13 @@ void CPPHtmlDrawer::DrawHtmlTableRow(CPPString & sRow, LPCRECT lpRect, STRUCT_TA
 		int nEndRow = nIndex;
 		int nNewCell = nIndex;
 		//ENG: Search an end of the cell or a begin of the nested table
-		//RUS: Ищем конец ячейки или начало вложенной таблицы
+		//RUS: Ищем коне?ячейк?ил?начало вложенно?таблиц?
 		SearchTag(sRow, nEndRow, _T("/tr"));
 		SearchTag(sRow, nNewCell, _T("td"));
 		if (nNewCell < nEndRow)
 		{
 			//ENG: Search an existing cell
-			//RUS: Поиск существующей ячейки
+			//RUS: Поис?существующей ячейк?
 			STRUCT_CELL * sc2 = &row [nCol];
 			while ((sc2->nColSpan < 0) && (nCol < (int)row.size())) 
 			{
@@ -1432,7 +1428,7 @@ void CPPHtmlDrawer::DrawHtmlTableRow(CPPString & sRow, LPCRECT lpRect, STRUCT_TA
 			} //while
 			STRUCT_CELL & sc = row [nCol];
 			//ENG: Searching the end of the cell
-			//RUS: Ищем окончание ячейки
+			//RUS: Ищем окончани?ячейк?
 			nIndex = nNewCell;
 			SearchEndOfCell(sRow, nIndex);
 			CPPString sCell = sRow.Mid(nNewCell, nIndex - nNewCell);
@@ -1441,7 +1437,7 @@ void CPPHtmlDrawer::DrawHtmlTableRow(CPPString & sRow, LPCRECT lpRect, STRUCT_TA
 			if (MODE_FIRSTPASS != m_nNumPass)
 			{
 				//ENG: Gets a real rectangle to draw a cell
-				//RUS: Получаем реальный прямоугольник для вывода ячейки
+				//RUS: Получаем реальный прямоугольник для вывода ячейк?
 				rcCell = *lpRect;
 				rcCell.left += m_defStyle.nPadding;
 				for (i = 0; i < nCol; i++)
@@ -1460,7 +1456,7 @@ void CPPHtmlDrawer::DrawHtmlTableRow(CPPString & sRow, LPCRECT lpRect, STRUCT_TA
 				rcCell.bottom += (sc.nRowSpan - 1) * (m_defStyle.nPadding + 1);
 
 				//ENG: cellspacing - margins from table's edge to the cell's edge
-				//RUS: cellspacing - отступ от контура таблицы до ячейки 
+				//RUS: cellspacing - отступ от контур?таблиц?до ячейк?
 //				rcCell.left += m_defStyle.nPadding;
 //				rcCell.top += m_defStyle.nPadding;
 //				rcCell.right -= m_defStyle.nPadding;
@@ -1472,12 +1468,12 @@ void CPPHtmlDrawer::DrawHtmlTableRow(CPPString & sRow, LPCRECT lpRect, STRUCT_TA
 			if (MODE_DRAW != m_nNumPass)
 			{
 				//ENG: Add a cellspacing
-				//RUS: Добавляем отступ ячейки от
+				//RUS: Добавляем отступ ячейк?от
 //				sc.szCell.cx += m_defStyle.nPadding + m_defStyle.nPadding;
 //				sc.szCell.cy += m_defStyle.nPadding + m_defStyle.nPadding;
 				
 				//ENG: Stores a span cells
-				//RUS: Запоминаем объединенные ячейки
+				//RUS: Запоминаем объединенные ячейк?
 				int nColSpan = sc.nColSpan + nCol;
 				int nRowSpan = sc.nRowSpan + nRow;
 				for (i = nCol + 1; i < nColSpan; i++)
@@ -1503,7 +1499,7 @@ void CPPHtmlDrawer::DrawHtmlTableRow(CPPString & sRow, LPCRECT lpRect, STRUCT_TA
 	} //while
 
 	//ENG: Restore styles before <tr> tag
-	//RUS: Восстанавливаем стили до тэга <tr>
+	//RUS: Восстанавливае?стил?до тэга <tr>
 	m_defStyle.strTag = _T("tr");
 	if (StoreRestoreStyle(TRUE))
 		UpdateContext();
@@ -1533,20 +1529,20 @@ void CPPHtmlDrawer::DrawHtmlTableCell(CPPString & sCell, LPCRECT lpRect, STRUCT_
 	RECT rcText;
 
 	//ENG: Applies styles of <td> tag
-	//RUS: Применяем стили ячейки (тэг <td>)
+	//RUS: Применяем стил?ячейк?(тэ?<td>)
 	m_defStyle.strTag = _T("td");
 	StoreRestoreStyle(FALSE);
 	SelectNewHtmlStyle(m_defStyle.strTag, m_defStyle);
 
 	//ENG: Passes a tag body and get a properties of the tag
-	//RUS: Пропускаем тэг начала ячейки и получаем строку свойств тэга
+	//RUS: Пропускаем тэ?начала ячейк??получаем строку свойст?тэга
 	int nIndex = 0;
 	CPPString sTag;
 	SearchNextTag(sCell, sTag, nIndex);
 	CPPString sProperties = SplitTag(sTag);
 
 	//ENG: Analyses a properties of the tag
-	//RUS: Анализируем свойства тэга
+	//RUS: Анализируе?свойства тэга
 	m_defStyle.nCellWidth = m_defStyle.nCellHeight = 0;
 	m_defStyle.bCellWidthPercent = m_defStyle.bCellHeightPercent = FALSE;
 	SIZE szSpan = AnalyseCellParam(sProperties, m_defStyle, FALSE);
@@ -1554,17 +1550,17 @@ void CPPHtmlDrawer::DrawHtmlTableCell(CPPString & sCell, LPCRECT lpRect, STRUCT_
 	if (MODE_FIRSTPASS == m_nNumPass)
 	{
 		//ENG: Stores a cell span info
-		//RUS: Сохраняем информацию об объединении ячеек
+		//RUS: Сохраняем информацию об объединени?ячеек
 		sc.nColSpan = szSpan.cx;
 		sc.nRowSpan = szSpan.cy;
 		//ENG: Stores an info about the recommended cell sizes
-		//RUS: Сохраняем информацию об рекомендованных размерах ячейки
+		//RUS: Сохраняем информацию об рекомендованны?размерах ячейк?
 //		sc.nWidth = m_defStyle.nCellWidth;
 //		sc.bWidthPercent = m_defStyle.bCellWidthPercent;
 //		sc.nHeight = m_defStyle.nCellHeight;
 //		sc.bHeightPercent = m_defStyle.bCellHeightPercent;
 		//ENG: 
-		//RUS: Если указаны минимальные рaзмеры ячейки, то установить их как начальные
+		//RUS: Если указан?минимальны??змер?ячейк? то установить их ка?начальны?
 		sc.szText.cx = m_defStyle.nCellWidth;
 //		sc.szText.cy = m_defStyle.nCellHeight;
 		sc.szText.cy = 0;
@@ -1579,13 +1575,13 @@ void CPPHtmlDrawer::DrawHtmlTableCell(CPPString & sCell, LPCRECT lpRect, STRUCT_
 	else if (MODE_DRAW == m_nNumPass)
 	{
 		//ENG: cellspacing - margins from table's edge to the cell's edge
-		//RUS: cellspacing - отступ от контура таблицы до ячейки 
+		//RUS: cellspacing - отступ от контур?таблиц?до ячейк?
 		rcText = rcCell;
 
 		if (m_defStyle.nFillBkgnd >= 0)
 		{
 			//ENG: Filling cell background
-			//RUS: Заполнение фона ячейки
+			//RUS: Заполнение фона ячейк?
 			m_drawmanager.FillEffect(m_hDC, m_defStyle.nFillBkgnd, &rcText, 
 				m_defStyle.crBkgnd, m_defStyle.crMidBkgnd, m_defStyle.crEndBkgnd, 5);
 		} //if
@@ -1597,7 +1593,7 @@ void CPPHtmlDrawer::DrawHtmlTableCell(CPPString & sCell, LPCRECT lpRect, STRUCT_
 			m_drawmanager.DrawRectangle(m_hDC, &rcText, m_crDisabled, m_crDisabled, m_defStyle.nBorderStyle);
 		
 		//ENG: cellpadding - margin from cell's edge to the inside cell text
-		//RUS: cellpadding - отступ от контура ячейки, до текста внутри ее
+		//RUS: cellpadding - отступ от контур?ячейк? до текста внутри ее
 		rcText.left += m_defStyle.nMargin + m_defStyle.nBorderWidth;
 		rcText.top += m_defStyle.nMargin + m_defStyle.nBorderWidth;
 		rcText.right -= m_defStyle.nMargin + m_defStyle.nBorderWidth;
@@ -1616,13 +1612,13 @@ void CPPHtmlDrawer::DrawHtmlTableCell(CPPString & sCell, LPCRECT lpRect, STRUCT_
 	} //if
 
 	//ENG: Draws a cell
-	//RUS: Вывод ячейки
+	//RUS: Выво?ячейк?
 	while(nIndex < sCell.GetLength())
 	{
 		int nEndCell = nIndex;
 		int nNewTable = nIndex;
 		//ENG: Search an end of the cell or a begin of the nested table
-		//RUS: Ищем конец ячейки или начало вложенной таблицы
+		//RUS: Ищем коне?ячейк?ил?начало вложенно?таблиц?
 		SearchTag(sCell, nEndCell, _T("/td"));
 		SearchTag(sCell, nNewTable, _T("table"));
 		//ENG: Gets a nearly index of the tag
@@ -1632,7 +1628,7 @@ void CPPHtmlDrawer::DrawHtmlTableCell(CPPString & sCell, LPCRECT lpRect, STRUCT_
 		if (nNearlyTag > nIndex)
 		{
 			//ENG: If between the last index and the current index there is a text
-			//RUS: Если между последним индексом и текущим индексом существует текст
+			//RUS: Если межд?последни?индексом ?текущи?индексом существует текс?
 			CPPString sText = sCell.Mid(nIndex, nNearlyTag - nIndex);
 			szTemp = DrawHtmlString(sText, &rcText);
 			nIndex = nNearlyTag;
@@ -1640,7 +1636,7 @@ void CPPHtmlDrawer::DrawHtmlTableCell(CPPString & sCell, LPCRECT lpRect, STRUCT_
 		else if (nNewTable < nEndCell)
 		{
 			//ENG: A nested table was found
-			//RUS: Найдена вложенная таблица
+			//RUS: Найден?вложенная таблиц?
 			nIndex = nNewTable;
 			SearchEndOfTable(sCell, nIndex);
 			CPPString sTable = sCell.Mid(nNewTable, nIndex - nNewTable);
@@ -1649,14 +1645,14 @@ void CPPHtmlDrawer::DrawHtmlTableCell(CPPString & sCell, LPCRECT lpRect, STRUCT_
 		else
 		{
 			//ENG: Alas, it is the end of the cell
-			//RUS: Конец ячейки
+			//RUS: Коне?ячейк?
 			nIndex = sCell.GetLength();
 		} //if
 		
 		if (MODE_DRAW != m_nNumPass)
 		{
 			//ENG: On first and second passes we are calculate the dimensions of the cell
-			//RUS: На первом и втором проходах вычисляем размеры ячейки.
+			//RUS: На первом ?втором проходах вычисляем размер?ячейк?
 			sc.szText.cx = max(szTemp.cx, sc.szText.cx);
 			sc.szText.cy += szTemp.cy;
 		} //if
@@ -1666,18 +1662,18 @@ void CPPHtmlDrawer::DrawHtmlTableCell(CPPString & sCell, LPCRECT lpRect, STRUCT_
 	if (MODE_DRAW != m_nNumPass)
 	{
 		//ENG: On first and second passes we are calculate the dimensions of the cell
-		//RUS: На первом и втором проходах вычисляем размеры ячейки.
+		//RUS: На первом ?втором проходах вычисляем размер?ячейк?
 		sc.szCell.cx = max(m_defStyle.nCellWidth, sc.szText.cx);
 		sc.szCell.cy = max(m_defStyle.nCellHeight, sc.szText.cy);
 
 		//ENG: Add the margins of the text from the cell's edges
-		//RUS: Добавляем отступы текста от границ ячейки
+		//RUS: Добавляем отступ?текста от границ ячейк?
 		sc.szCell.cx += 2 * (m_defStyle.nMargin + m_defStyle.nBorderWidth);
 		sc.szCell.cy += 2 * (m_defStyle.nMargin + m_defStyle.nBorderWidth);
 	} //if
 		
 	//ENG: Restore styles before <td> tag
-	//RUS: Воостанавливаем стили, которые были до тэга <td>
+	//RUS: Воостанавливае?стил? которы?были до тэга <td>
 	m_defStyle.strTag = _T("td");
 	if (StoreRestoreStyle(TRUE))
 		UpdateContext();
@@ -1687,26 +1683,22 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 {
 	SIZE szTextArea = {0, 0};
 
-	COLORREF clrShadow = m_bIsEnable ? m_crShadow : GetColorByName("");
+	COLORREF clrShadow = m_bIsEnable ? m_crShadow : GetColorByName(_T(""));
 
-	//ENG: For any string we are add a <body> tag as wrapper
-	//RUS: Для любой строки добавляем тэг <body>
+	// For any string we are add a <body> tag as wrapper
 	sHtml = _T("<body>") + sHtml;
 	sHtml += _T("</body>");
 
-	//ENG: Bounding rectangle for a full text
-	//RUS: Ограничивающий прямоугольник для вывода всего текста
+	// Bounding rectangle for a full text
 	m_rcOutput.top = lpRect->top;
 	m_rcOutput.left = lpRect->left;
 	m_rcOutput.bottom = lpRect->bottom;
 	m_rcOutput.right = lpRect->right;
 
-	//ENG: The width of the bounding rectangle
-	//RUS: Ширина ограничивающего прямоугольника
+	// The width of the bounding rectangle
 	int nTextWrapWidth = m_rcOutput.right - m_rcOutput.left;
 
-	//ENG: A current position for output
-	//RUS: Текущая позиция для вывода
+	// A current position for output
 	POINT ptOutput;
 	ptOutput.x = lpRect->left;
 	ptOutput.y = lpRect->top;
@@ -1716,8 +1708,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 
 //	m_szOutput = CSize(0, 0);
 
-	//ENG: If a text is empty
-	//RUS: Если текста для вывода нет
+	// If a text is empty
 //	if (str.IsEmpty())
 //	{
 //		szTextArea.cx = szTextArea.cy = 0;
@@ -1741,8 +1732,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 
 	BOOL bCloseTag = FALSE; //TRUE if tag have symbol '\'
 
-	//ENG: Initializing a new line
-	//RUS: Инициализация новой строки
+	// Initializing a new line
 	ptOutput.x = InitNewLine(ptOutput.x);
 	int nBeginLineX = ptOutput.x;
 	int nSpacesInLine = m_hline.nSpaceChars;
@@ -1754,31 +1744,31 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 	while (i < sHtml.GetLength())
 	{
 		//ENG: Searching a first tag
-		//RUS: Поиск первого тэга
+		//RUS: Поис?первог?тэга
 		sText = SearchNextTag(sHtml, sTag, i);
 		sProperties = SplitTag(sTag);
 
 		//ENG: Before a tag was exist a text
-		//RUS: Перед тэгом есть текст для вывода
+		//RUS: Пере?тэго?есть текс?для вывода
 		if (!sText.IsEmpty())
 		{
 			//ENG: Transform text
-			//RUS: Преобразуем текст
+			//RUS: Преобразуе?текс?
 			switch (m_defStyle.nTextTransform)
 			{
 			case TEXT_TRANSFORM_UPPERCASE:
 				//ENG: All chars make upper
-				//RUS: Все символы переводим в верхний регистр
+				//RUS: Вс?символ?переводи??верхни?регист?
 				sText.MakeUpper();
 				break;
 			case TEXT_TRANSFORM_LOWERCASE:
 				//ENG: All chars make lower
-				//RUS: Все символы переводим в нижний регистр
+				//RUS: Вс?символ?переводи??нижний регист?
 				sText.MakeLower();
 				break;
 			case TEXT_TRANSFORM_CAPITALIZE:
 				//ENG: Each first char of a word to upper
-				//RUS: Кадый первый символ слова в верхний регистр, остальные в нижний
+				//RUS: Кады?первый символ слов??верхни?регист? остальны??нижний
 				sText.MakeLower();
 				for (nIndex = 0; nIndex < sText.GetLength(); nIndex++)
 				{
@@ -1791,11 +1781,11 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 				break;
 			} //switch
 
-			//RUS: Зацикливаем до тех пор, пока не будет выведен весь текст
+			//RUS: Зацикливае?до те?по? пока не буде?выведе?весь текс?
 			while (!sText.IsEmpty())
 			{
 				//ENG: Reset an additional interval for space chars
-				//RUS: Сброс дополнительного интервала между словами
+				//RUS: Сбро?дополнительног?интервал?межд?словам?
 				::SetTextJustification(m_hDC, 0, 0);
 
 				//ENG: Gets a size a output text
@@ -1803,7 +1793,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 				::GetTextExtentPoint32(m_hDC, sText, sText.GetLength(), &sz);
 
 				//ENG: Gets a real top coordinate to output with vertical alignment
-				//RUS: Получаем реальную коодинату верха вывода с учетом вертикального выравнивания
+				//RUS: Получаем реальную коодинат?верх?вывода ?учетом вертикальног?выравниван?
 				y = VerticalAlignText(ptOutput.y, sz.cy);
 
 				CPPString sTemp = sText;
@@ -1828,7 +1818,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 						if ((0 == (nRealWidth - sz.cx)) && (_T(' ') == sTemp.GetAt(sTemp.GetLength() - 1)))
 						{
 							//ENG: Removes the right space chars for the last output in line
-							//RUS: Если это последний вывод в строке, то убираем пробелы справа
+							//RUS: Если эт?последни?выво??строке, то убирае?пробел?справа
 							sTemp.TrimRight();
 							nSpacesInLine = GetCountOfChars(sTemp);
 							SIZE szTemp;
@@ -1845,16 +1835,16 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 						::GetTextExtentPoint32(m_hDC, sTemp, sTemp.GetLength(), &sz);
 						
 						//ENG: Stores a current area as a hyperlink area if it available
-						//RUS: Сохранякм текущую область как область гиперлинка если он установлен
+						//RUS: Сохранякм текущу?област?ка?област?гиперлинка если он установлен
 						StoreHyperlinkArea(ptOutput.x, y, ptOutput.x + sz.cx, y + sz.cy);
 						
 						//ENG: Real output a text
-						//RUS: Вывод текста
+						//RUS: Выво?текста
 						::TextOut(m_hDC, ptOutput.x, y, sTemp, sTemp.GetLength());
 						nSpacesInLine -= GetCountOfChars(sTemp);
 						
 						//ENG: If sets an overline style then draw a line over the text
-						//RUS: Если установлен стиль overline, то рисуем линию над текстом
+						//RUS: Если установлен стил?overline, то рисуем лини?на?тексто?
 						if (m_defStyle.bOverlineFont)
 						{
 							HPEN hpenOverline = ::CreatePen(PS_SOLID, (m_defStyle.nWeightFont >= FW_BOLD) ? 2 : 1, m_defStyle.crText);
@@ -1868,7 +1858,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 				else
 				{
 					//ENG: Stores a last horizontal alignment
-					//RUS: Сохраняем последнее горизонтальное выравнивание
+					//RUS: Сохраняем последне?горизонтальное выравнивание
 					m_hline.nHorzAlign = m_defStyle.nHorzAlign;
 
 					//ENG:
@@ -1877,12 +1867,12 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 				} //if
 
 				//ENG: Moves to a right of the outputed text
-				//RUS: Перемещаемся справа от выведенного текста
+				//RUS: Перемещаем? справа от выведенног?текста
 				ptOutput.x += sz.cx;
 				if (!sText.IsEmpty())
 				{
 					//ENG: Not all text was printed (cause text wrap) 
-					//RUS: Не вся строка еще вывелась (в случае переноса текста)
+					//RUS: Не вся строка ещ?вывелась (?случае переноса текста)
 					m_hline.bWrappedLine = TRUE;
 					Tag_NewLine(&ptOutput, 1, &szTextArea);
 					nBeginLineX = ptOutput.x;
@@ -1893,11 +1883,11 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 		} //if
 
 		//ENG: If tag was found then analyzing ...
-		//RUS: Если тэг найден, анализируем ...
+		//RUS: Если тэ?найден, анализируе?...
 		if (!sTag.IsEmpty())
 		{
 			//ENG: Reset temporary parameters
-			//RUS: Сброс временных параметров
+			//RUS: Сбро?временны?параметров
 			m_defStyle.strTag.Empty();
 			bCloseTag = FALSE;
 			
@@ -1906,15 +1896,15 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 			nIndex = 0;
 			
 			//ENG: Searching a tag's value
-			//RUS: Поиск значения тэга
+			//RUS: Поис?значен? тэга
 			DWORD dwTag = GetTagFromList(sTag, m_defStyle.strTag, bCloseTag);
 			
 			//ENG: If a tag was found in a list of the tags
-			//RUS: Если тэг найден в списке
+			//RUS: Если тэ?найден ?списке
 			if (TAG_NONE != dwTag)
 			{
 				//ENG: If it is a style tag 
-				//RUS: Если текущий тэг для работы со стилями
+				//RUS: Если текущи?тэ?для работы со стилями
 				if (!m_defStyle.strTag.IsEmpty())
 				{
 					//ENG: Checks on permissibility of tag
@@ -1922,11 +1912,11 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 					if (StoreRestoreStyle(bCloseTag))
 					{
 						//ENG: If it isn't a close tag
-						//RUS: Если это не окончание тэга
+						//RUS: Если эт?не окончани?тэга
 						if (!bCloseTag)
 						{
 							//ENG: Processing a tag
-							//RUS: Обработка тэга
+							//RUS: Обработк?тэга
 							switch (dwTag)
 							{
 							case TAG_BOLD:
@@ -1948,14 +1938,14 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 								while (nIndex < sProperties.GetLength())
 								{
 									//ENG: Searching a parameters of a tag
-									//RUS: Поиск параметров тэга
+									//RUS: Поис?параметров тэга
 									sValue = GetNextProperty(sProperties, nIndex, sParameter);
 									//ENG: If a parameter was found
 									//RUS: Если параметр найден
 									if (!sParameter.IsEmpty())
 									{
 										//ENG: Processing a parameters of a tag
-										//RUS: Обработка параметров тэга
+										//RUS: Обработк?параметров тэга
 										if (sParameter == _T("face"))
 											m_defStyle.sFaceFont = GetStyleString(sValue, m_defStyle.sFaceFont);
 										else if (sParameter == _T("size"))
@@ -1965,7 +1955,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 											if (m_bIsEnable)
 												m_defStyle.crText = GetStyleColor(sValue, m_defStyle.crText);
 											else
-												m_defStyle.crText = GetColorByName("");
+												m_defStyle.crText = GetColorByName(_T(""));
 										}
 										else if (sParameter == _T("style"))
 											GetStyleFontShortForm(sValue);
@@ -2017,7 +2007,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 								while (nIndex < sProperties.GetLength())
 								{
 									//ENG: Searching a parameters of a tag
-									//RUS: Поиск параметров тэга
+									//RUS: Поис?параметров тэга
 									sValue = GetNextProperty(sProperties, nIndex, sParameter);
 									//ENG: If a parameter was found
 									//RUS: Если параметр найден
@@ -2027,20 +2017,20 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 								break;
 							case TAG_HYPERLINK:
 								//ENG: A default values
-								//RUS: Значения по умолчанию
+								//RUS: Значен? по умолчани?
 								m_defStyle.nTypeLink = LINK_MESSAGE;
 								m_defStyle.sHyperlink.Empty();
 								while (nIndex < sProperties.GetLength())
 								{
 									//ENG: Searching a parameters of a tag
-									//RUS: Поиск параметров тэга
+									//RUS: Поис?параметров тэга
 									sValue = GetNextProperty(sProperties, nIndex, sParameter);
 									//ENG: If a parameter was found
 									//RUS: Если параметр найден
 									if (!sParameter.IsEmpty())
 									{
 										//ENG: Processing a parameters of a tag
-										//RUS: Обработка параметров тэга
+										//RUS: Обработк?параметров тэга
 										if (sParameter == _T("href"))
 										{
 											m_defStyle.nTypeLink = LINK_HREF;
@@ -2054,10 +2044,10 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 									} //if
 								} //while
 								//ENG: Gets a index of a current link
-								//RUS: Получаем индекс текущей гиперссылки
+								//RUS: Получаем индекс текуще?гиперссылк?
 								m_nCurIndexLink ++;
 								//ENG: If a mouse over this link
-								//RUS: Если мыш над этим тэгом
+								//RUS: Если мы?на?этим тэго?
 								if (m_nCurIndexLink == m_nHoverIndexLink)
 									SelectNewHtmlStyle(_T("a:hover"), m_defStyle);
 								else
@@ -2066,7 +2056,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 								} //switch
 							} //if
 							//ENG: Update a device context
-							//RUS: Обновление контекста устройства
+							//RUS: Обновление контекст?устройства
 							UpdateContext();
 						} //if
 					}
@@ -2090,12 +2080,12 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 						//CPPString str;
 						
 						//ENG: Processing a tag
-						//RUS: Обработка тэга
+						//RUS: Обработк?тэга
 						switch (dwTag)
 						{
 						case TAG_HLINE:
 							//ENG: Draws the horizontal line
-							//RUS: Рисование горизонтальной линии
+							//RUS: Рисовани?горизонтальной лини?
 							csTemp = m_defStyle;
 							csTemp.nBorderWidth = 1;
 							//ENG: Applies a new styles for <hr> tag
@@ -2106,14 +2096,14 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 							while (nIndex < sProperties.GetLength())
 							{
 								//ENG: Searching a parameters of a tag
-								//RUS: Поиск параметров тэга
+								//RUS: Поис?параметров тэга
 								sValue = GetNextProperty(sProperties, nIndex, sParameter);
 								//ENG: If a parameter was found
 								//RUS: Если параметр найден
 								if (!sParameter.IsEmpty())
 								{
 									//ENG: Processing a parameters of a tag
-									//RUS: Обработка параметров тэга
+									//RUS: Обработк?параметров тэга
 									if (sParameter == _T("width"))
 									{
 										bPercent = IsPercentableValue(sValue);
@@ -2126,7 +2116,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 										if (m_bIsEnable)
 											csTemp.crText = GetStyleColor(sValue, csTemp.crText);
 										else
-											csTemp.crText = GetColorByName("");
+											csTemp.crText = GetColorByName(_T(""));
 									}
 								} //if
 							} //while
@@ -2171,7 +2161,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 							break;
 						case TAG_TABULATION:
 							//ENG: Tabulation
-							//RUS: Табуляция
+							//RUS: Табу?ция
 							nNum = 1;
 							if (!sProperties.IsEmpty())
 							{
@@ -2185,7 +2175,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 							//Draws the bitmap 
 							//-----------------------------
 							//ENG: Default Parameters
-							//RUS: Параметры по умолчанию
+							//RUS: Параметр?по умолчани?
 							si.nIdRes = 0;
 							si.nIdDll = 0;
 							si.nHandle = 0;
@@ -2201,7 +2191,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 							si.strPathDll.Empty();
 							
 							//ENG: Searching image parameters
-							//RUS: Поиск параметров изображения
+							//RUS: Поис?параметров изображения
 							AnalyseImageParam(sProperties, si);
 							
 							//ENG: If a image's source was specified
@@ -2209,7 +2199,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 							if (si.nIdRes || si.nIdDll || si.nHandle || !si.strSrcFile.IsEmpty())
 							{
 								//ENG: Sets a autodelete flag of the image object
-								//RUS: Установлен флаг автоматического удаления объекта изображения
+								//RUS: Установлен флаг автоматическог?удален? объект?изображения
 								bAutoDelete = TRUE;
 								
 								//ENG: Gets a handle of the image
@@ -2224,16 +2214,16 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 								{
 									hBitmap = (HBITMAP)si.nHandle;
 									//ENG: If an image handle specified, disables autodelete
-									//RUS: Если указан дескриптор изображения, то запрещаем удаление
+									//RUS: Если указан дескриптор изображения, то запрещае?удаление
 									bAutoDelete = FALSE;
 								} //if
 								
 								//ENG: If a handle of an image was retrieved
-								//RUS: Если дескриптор изображения получен
+								//RUS: Если дескриптор изображения получе?
 								if (NULL != hBitmap)
 								{
 									//ENG: Image with shadow or not?
-									//RUS: Изображение с тенью или нет
+									//RUS: Изображени??тень?ил?не?
 									bShadow = IsImageWithShadow(si);
 									
 									//ENG: Retrieves an original size of an image
@@ -2241,12 +2231,12 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 									m_drawmanager.GetSizeOfBitmap(hBitmap, &sz);
 									
 									//ENG: Retrieves an output size
-									//RUS: Получаем размеры для рисования
+									//RUS: Получаем размер?для рисования
 									if (si.bPercentWidth) si.nWidth = ::MulDiv(sz.cx, si.nWidth, 100);
 									if (si.bPercentHeight) si.nHeight = ::MulDiv(sz.cy, si.nHeight, 100);
 									
 									//ENG: If a shadow was enabled then set a real size
-									//RUS: Если тень доступна, то устанавливаем реальный размер
+									//RUS: Если тень доступна, то устанавливае?реальный размер
 									if (si.nWidth && si.nHeight && bShadow)
 									{
 										sz.cx = si.nWidth + m_szOffsetShadow.cx;
@@ -2257,7 +2247,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 									if (m_nMaxWidth && ((nMaxSize - sz.cx) < 0) && nTextWrapWidth) 
 									{
 										//ENG: Not all text was printed (cause text wrap) 
-										//RUS: Не вся строка еще вывелась (в случае переноса текста)
+										//RUS: Не вся строка ещ?вывелась (?случае переноса текста)
 										m_hline.bWrappedLine = TRUE;
 										Tag_NewLine(&ptOutput, 1, &szTextArea);
 										nBeginLineX = ptOutput.x;
@@ -2267,24 +2257,24 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 									nRealWidth -= sz.cx;
 
 									//ENG: Store a last horizontal alignment
-									//RUS: Запоминаем последнее горизонтальное выравнивание
+									//RUS: Запоминаем последне?горизонтальное выравнивание
 									if (MODE_FIRSTPASS == m_nNumPass) 
 										m_hline.nHorzAlign = m_defStyle.nHorzAlign;
 									
 									//ENG: Retrieves a vertical coordinates of drawing area
-									//RUS: Получаем вертикальную координату области рисования
+									//RUS: Получаем вертикальную координату област?рисования
 									y = VerticalAlignImage(ptOutput.y, si.nHeight);
 									
 									//ENG: If an image is exist and not prepare mode
-									//RUS: Если изображение доступно и не установлен режим подготовки
+									//RUS: Если изображени?доступно ?не установлен режи?подготовки
 									if (si.nWidth && si.nHeight && (MODE_DRAW == m_nNumPass))
 									{
 										//ENG: Add an output area to hyperlink list if needed
-										//RUS: Если необходимо добавляем область вывода в список гиперссылок
+										//RUS: Если необходимо добавляем област?вывода ?список гиперссыло?
 										StoreHyperlinkArea(ptOutput.x, y, ptOutput.x + sz.cx, y + sz.cy);
 										
 										//ENG: If a mouse over an image then applies a hot styles
-										//RUS: Если мышь над изображением, то применяем соотвествующие стили
+										//RUS: Если мышь на?изображением, то применяем соотвествующие стил?
 										if (m_defStyle.nTypeLink != LINK_NONE)
 										{
 											if (m_nCurIndexLink == m_nHoverIndexLink)
@@ -2295,7 +2285,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 											si.nStyles = (si.nStyles & 0xFF00) | IMAGE_EFFECT_MONOCHROME;
 										
 										//ENG: Drawing an image
-										//RUS: Рисование изображения
+										//RUS: Рисовани?изображения
 										m_drawmanager.DrawBitmap(m_hDC, ptOutput.x, y, si.nWidth, si.nHeight, hBitmap, 
 											si.bUseMask, si.crMask, si.nStyles, 
 											bShadow, 
@@ -2305,7 +2295,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 									} //if
 									
 									//ENG: Moves to a right of the outputed image
-									//RUS: Перемещаемся справа от выведенного изображения
+									//RUS: Перемещаем? справа от выведенног?изображения
 									ptOutput.x += sz.cx; //si.nWidth;
 									
 									//ENG: If needed delete a handle of an image
@@ -2320,7 +2310,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 							//Draws the icon
 							//-----------------------------
 							//ENG: Default Parameters
-							//RUS: Параметры по умолчанию
+							//RUS: Параметр?по умолчани?
 							si.nIdRes = 0;
 							si.nIdDll = 0;
 							si.nHandle = 0;
@@ -2334,7 +2324,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 							si.strPathDll.Empty();
 							
 							//ENG: Searching image parameters
-							//RUS: Поиск параметров изображения
+							//RUS: Поис?параметров изображения
 							AnalyseImageParam(sProperties, si);
 							
 							//ENG: If a image's source was specified
@@ -2342,10 +2332,10 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 							if (si.nIdRes || si.nIdDll || si.nHandle || !si.strSrcFile.IsEmpty())
 							{
 								//ENG: Sets a autodelete flag of the image object
-								//RUS: Установлен флаг автоматического удаления объекта изображения
+								//RUS: Установлен флаг автоматическог?удален? объект?изображения
 								bAutoDelete = TRUE;
 								
-								//RUS: Получаем требуемый размер иконки
+								//RUS: Получаем требуемы?размер иконки
 								sz.cx = si.nWidth;
 								sz.cy = si.nHeight;
 								if (si.bPercentWidth) sz.cx = ::MulDiv(::GetSystemMetrics(SM_CXICON), si.nWidth, 100);
@@ -2364,16 +2354,16 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 									hIcon = (HICON)si.nHandle;
 									
 									//ENG: If an image handle specified, disables autodelete
-									//RUS: Если указан дескриптор изображения, то запрещаем удаление
+									//RUS: Если указан дескриптор изображения, то запрещае?удаление
 									bAutoDelete = FALSE;
 								} //if
 								
 								//ENG: If a handle of an image was retrieved
-								//RUS: Если дескриптор изображения получен
+								//RUS: Если дескриптор изображения получе?
 								if (NULL != hIcon)
 								{
 									//ENG: Image with shadow or not?
-									//RUS: Изображение с тенью или нет
+									//RUS: Изображени??тень?ил?не?
 									BOOL bShadow = IsImageWithShadow(si);
 									
 									//ENG: Retrieves an original size of an image
@@ -2383,12 +2373,12 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 									si.nHeight = sz.cy;
 									
 									//ENG: Retrieves an output size
-									//RUS: Получаем размеры для рисования
+									//RUS: Получаем размер?для рисования
 									//									if (si.bPercentWidth) si.nWidth = ::MulDiv(sz.cx, si.nWidth, 100);
 									//									if (si.bPercentHeight) si.nHeight = ::MulDiv(sz.cy, si.nHeight, 100);
 									
 									//ENG: If a shadow was enabled then set a real size
-									//RUS: Если тень доступна, то устанавливаем реальный размер
+									//RUS: Если тень доступна, то устанавливае?реальный размер
 									if (si.nWidth && si.nHeight && bShadow)
 									{
 										sz.cx = si.nWidth + m_szOffsetShadow.cx;
@@ -2399,7 +2389,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 									if (m_nMaxWidth && ((nMaxSize - sz.cx) < 0) && nTextWrapWidth) 
 									{
 										//ENG: Not all text was printed (cause text wrap) 
-										//RUS: Не вся строка еще вывелась (в случае переноса текста)
+										//RUS: Не вся строка ещ?вывелась (?случае переноса текста)
 										m_hline.bWrappedLine = TRUE;
 										Tag_NewLine(&ptOutput, 1, &szTextArea);
 										nBeginLineX = ptOutput.x;
@@ -2409,24 +2399,24 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 									nRealWidth -= sz.cx;
 									
 									//ENG: Store a last horizontal alignment
-									//RUS: Запоминаем последнее горизонтальное выравнивание
+									//RUS: Запоминаем последне?горизонтальное выравнивание
 									if (MODE_FIRSTPASS == m_nNumPass) 
 										m_hline.nHorzAlign = m_defStyle.nHorzAlign;
 									
 									//ENG: Retrieves a vertical coordinates of drawing area
-									//RUS: Получаем вертикальную координату области рисования
+									//RUS: Получаем вертикальную координату област?рисования
 									y = VerticalAlignImage(ptOutput.y, si.nHeight);
 									
 									//ENG: If an image is exist and not prepare mode
-									//RUS: Если изображение доступно и не установлен режим подготовки
+									//RUS: Если изображени?доступно ?не установлен режи?подготовки
 									if (si.nWidth && si.nHeight && (MODE_DRAW == m_nNumPass))
 									{
 										//ENG: Add an output area to hyperlink list if needed
-										//RUS: Если необходимо добавляем область вывода в список гиперссылок
+										//RUS: Если необходимо добавляем област?вывода ?список гиперссыло?
 										StoreHyperlinkArea(ptOutput.x, y, ptOutput.x + sz.cx, y + sz.cy);
 										
 										//ENG: If a mouse over an image then applies a hot styles
-										//RUS: Если мышь над изображением, то применяем соотвествующие стили
+										//RUS: Если мышь на?изображением, то применяем соотвествующие стил?
 										if (m_defStyle.nTypeLink != LINK_NONE)
 										{
 											if (m_nCurIndexLink == m_nHoverIndexLink)
@@ -2437,7 +2427,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 											si.nStyles = (si.nStyles & 0xFF00) | IMAGE_EFFECT_MONOCHROME;
 										
 										//ENG: Drawing an image
-										//RUS: Рисование изображения
+										//RUS: Рисовани?изображения
 										m_drawmanager.DrawIcon(m_hDC, ptOutput.x, y, si.nWidth, si.nHeight, hIcon, si.nStyles, 
 											bShadow, 
 											m_szOffsetShadow.cx, m_szOffsetShadow.cy, 
@@ -2445,7 +2435,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 											clrShadow);
 									} //if
 									//ENG: Moves to a right of the outputed image
-									//RUS: Перемещаемся справа от выведенного изображения
+									//RUS: Перемещаем? справа от выведенног?изображения
 									ptOutput.x += sz.cx; //si.nWidth;
 									
 									//ENG: If needed delete a handle of an image
@@ -2460,7 +2450,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 							//Draws the icon from image list
 							//-----------------------------
 							//ENG: Default Parameters
-							//RUS: Параметры по умолчанию
+							//RUS: Параметр?по умолчани?
 							si.nIndexImageList = 0;
 							si.nIdRes = 0;
 							si.nIdDll = 0;
@@ -2480,17 +2470,17 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 							si.strPathDll.Empty();
 							
 							//ENG: Searching image parameters
-							//RUS: Поиск параметров изображения
+							//RUS: Поис?параметров изображения
 							AnalyseImageParam(sProperties, si);
 							
 							//ENG: Image with shadow or not?
-							//RUS: Изображение с тенью или нет
+							//RUS: Изображени??тень?ил?не?
 							bShadow = IsImageWithShadow(si);
 							
 							if (si.nIdRes || si.nIdDll || si.nHandle || !si.strSrcFile.IsEmpty())
 							{
 								//ENG: Sets a autodelete flag of the image object
-								//RUS: Установлен флаг автоматического удаления объекта изображения
+								//RUS: Установлен флаг автоматическог?удален? объект?изображения
 								bAutoDelete = TRUE;
 								
 								//ENG: Gets a handle of the image
@@ -2505,12 +2495,12 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 								{
 									hBitmap = (HBITMAP)si.nHandle;
 									//ENG: If an image handle specified, disables autodelete
-									//RUS: Если указан дескриптор изображения, то запрещаем удаление
+									//RUS: Если указан дескриптор изображения, то запрещае?удаление
 									bAutoDelete = FALSE;
 								} //if
 								
 								//ENG: If a handle of an image was retrieved
-								//RUS: Если дескриптор изображения получен
+								//RUS: Если дескриптор изображения получе?
 								if (NULL != hBitmap)
 								{
 									//ENG: Retrieves an original size of an image
@@ -2518,7 +2508,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 									m_drawmanager.GetSizeOfBitmap(hBitmap, &sz);
 
 									//ENG: Creates a no specified sizes
-									//RUS: Создаем незаданные размеры
+									//RUS: Создае?незаданные размер?
 									if (!si.cx && !si.cy)
 										si.cx = si.cy = min(sz.cx, sz.cy);
 									else if (!si.cx)
@@ -2527,12 +2517,12 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 										si.cy = si.cx;
 									
 									//ENG: Retrieves an output size
-									//RUS: Получаем размеры для рисования
+									//RUS: Получаем размер?для рисования
 									if (si.bPercentWidth) si.nWidth = ::MulDiv(si.cx, si.nWidth, 100);
 									if (si.bPercentHeight) si.nHeight = ::MulDiv(si.cy, si.nHeight, 100);
 									
 									//ENG: If a shadow was enabled then set a real size
-									//RUS: Если тень доступна, то устанавливаем реальный размер
+									//RUS: Если тень доступна, то устанавливае?реальный размер
 									szReal.cx = si.nWidth;
 									szReal.cy = si.nHeight;
 									if (si.nWidth && si.nHeight && bShadow)
@@ -2542,7 +2532,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 									} //if
 									
 									//ENG: Gets a max columns and rows of the images on the bitmap
-									//RUS: Получаем максимальное число колонок и строк изображений на битмапке
+									//RUS: Получаем максимальное числ?колоно??стро?изображени?на битмапке
 									nMaxCol = sz.cx / si.cx;
 									nMaxRow = sz.cy / si.cy;
 									
@@ -2565,14 +2555,14 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 									} //if
 									
 									//ENG: If a specified index of image is a legitimate value
-									//RUS: Если указанный индекс изображения допустим
+									//RUS: Если указанны?индекс изображения допустим
 									if ((si.nIndexImageList < (int)(nMaxCol * nMaxRow)) && nMaxCol && nMaxRow)
 									{
 										int nMaxSize = nTextWrapWidth - ptOutput.x + m_rcOutput.left;
 										if (m_nMaxWidth && ((nMaxSize - szReal.cx) < 0) && nTextWrapWidth) 
 										{
 											//ENG: Not all text was printed (cause text wrap) 
-											//RUS: Не вся строка еще вывелась (в случае переноса текста)
+											//RUS: Не вся строка ещ?вывелась (?случае переноса текста)
 											m_hline.bWrappedLine = TRUE;
 											Tag_NewLine(&ptOutput, 1, &szTextArea);
 											nBeginLineX = ptOutput.x;
@@ -2582,24 +2572,24 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 										nRealWidth -= szReal.cx;
 										
 										//ENG: Store a last horizontal alignment
-										//RUS: Запоминаем последнее горизонтальное выравнивание
+										//RUS: Запоминаем последне?горизонтальное выравнивание
 										if (MODE_FIRSTPASS == m_nNumPass) 
 											m_hline.nHorzAlign = m_defStyle.nHorzAlign;
 										
 										//ENG: Retrieves a vertical coordinates of drawing area
-										//RUS: Получаем вертикальную координату области рисования
+										//RUS: Получаем вертикальную координату област?рисования
 										y = VerticalAlignImage(ptOutput.y, szReal.cy);
 										
 										//ENG: If an image is exist and not prepare mode
-										//RUS: Если изображение доступно и не установлен режим подготовки
+										//RUS: Если изображени?доступно ?не установлен режи?подготовки
 										if (si.nWidth && si.nHeight && (MODE_DRAW == m_nNumPass))
 										{
 											//ENG: Add an output area to hyperlink list if needed
-											//RUS: Если необходимо добавляем область вывода в список гиперссылок
+											//RUS: Если необходимо добавляем област?вывода ?список гиперссыло?
 											StoreHyperlinkArea(ptOutput.x, y, ptOutput.x + szReal.cx, y + szReal.cy);
 											
 											//ENG: If a mouse over an image then applies a hot styles
-											//RUS: Если мышь над изображением, то применяем соотвествующие стили
+											//RUS: Если мышь на?изображением, то применяем соотвествующие стил?
 											if (m_defStyle.nTypeLink != LINK_NONE)
 											{
 												if (m_nCurIndexLink == m_nHoverIndexLink)
@@ -2610,7 +2600,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 												si.nStyles = (si.nStyles & 0xFF00) | IMAGE_EFFECT_MONOCHROME;
 											
 											//ENG: Drawing an image
-											//RUS: Рисование изображения
+											//RUS: Рисовани?изображения
 											m_drawmanager.DrawImageList(m_hDC, ptOutput.x, y, si.nWidth, si.nHeight, hBitmap,
 												si.nIndexImageList, si.cx, si.cy,
 												si.bUseMask, si.crMask, si.nStyles, 
@@ -2621,7 +2611,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 										} //if
 										
 										//ENG: Moves to a right of the outputed image
-										//RUS: Перемещаемся справа от выведенного изображения
+										//RUS: Перемещаем? справа от выведенног?изображения
 										ptOutput.x += szReal.cx;
 									} //if
 									
@@ -2658,7 +2648,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 										if (m_nMaxWidth && ((nMaxSize - szReal.cx) < 0) && nTextWrapWidth) 
 										{
 											//ENG: Not all text was printed (cause text wrap) 
-											//RUS: Не вся строка еще вывелась (в случае переноса текста)
+											//RUS: Не вся строка ещ?вывелась (?случае переноса текста)
 											m_hline.bWrappedLine = TRUE;
 											Tag_NewLine(&ptOutput, 1, &szTextArea);
 											nBeginLineX = ptOutput.x;
@@ -2706,7 +2696,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 							while (nIndex < sProperties.GetLength())
 							{
 								//ENG: Searching a parameters of a tag
-								//RUS: Поиск параметров тэга
+								//RUS: Поис?параметров тэга
 								sValue = GetNextProperty(sProperties, nIndex, sParameter);
 								//ENG: If a parameter was found
 								//RUS: Если параметр найден
@@ -2753,7 +2743,7 @@ SIZE CPPHtmlDrawer::DrawHtmlString (CPPString & sHtml, LPCRECT lpRect)
 	}
 
 	//ENG: Reset an additional interval for space chars
-	//RUS: Сброс дополнительного интервала между словами
+	//RUS: Сбро?дополнительног?интервал?межд?словам?
 	::SetTextJustification(m_hDC, 0, 0);
 
 	szTextArea.cy = ptOutput.y - lpRect->top;
@@ -2835,7 +2825,7 @@ void CPPHtmlDrawer::UpdateContext()
 	m_lfDefault.lfItalic = m_defStyle.bItalicFont;
 	m_lfDefault.lfStrikeOut = m_defStyle.bStrikeOutFont;
 	m_lfDefault.lfUnderline = m_defStyle.bUnderlineFont;
-	_tcscpy (m_lfDefault.lfFaceName, m_defStyle.sFaceFont);
+	_tcscpy_s(m_lfDefault.lfFaceName, m_defStyle.sFaceFont);
 	m_hFont = ::CreateFontIndirect(&m_lfDefault);
 	m_hOldFont = (HFONT)::SelectObject(m_hDC, m_hFont);
 	::GetTextMetrics(m_hDC, &m_tm);
@@ -2925,7 +2915,7 @@ int CPPHtmlDrawer::InitNewLine(int x)
 	if (MODE_FIRSTPASS == m_nNumPass)
 	{
 		//ENG: Creates a new line with default parameters
-		//RUS: Создание новой линии с параметрами по-умолчанию
+		//RUS: Создание ново?лини??параметрам?по-умолчани?
 		m_hline.nAddPercentWidth = 0;
 		m_hline.nDescentLine = 0;
 		m_hline.nHeightLine = 0;
@@ -2937,7 +2927,7 @@ int CPPHtmlDrawer::InitNewLine(int x)
 	else if (MODE_DRAW == m_nNumPass)
 	{
 		//ENG: Gets the data of the first line and converts the percent value to the real width
-		//RUS: Получаем данные первой строки и преобразуем процентную ширину в реальную
+		//RUS: Получаем данные первой строки ?преобразуе?процентную ширину ?реальную
 		m_hline = m_arrHtmlLine [m_nCurLine];
 		int nRealWidth = m_rcOutput.right - m_rcOutput.left;
 		
@@ -2950,7 +2940,7 @@ int CPPHtmlDrawer::InitNewLine(int x)
 			::SetTextJustification(m_hDC, 0, 0);
 		
 		//ENG: Horizontal coordinate of the begin output
-		//RUS: Координата начала вывода с учетом выравнивания
+		//RUS: Координата начала вывода ?учетом выравниван?
 		switch (m_hline.nHorzAlign)
 		{
 		case ALIGN_CENTER:
@@ -2984,17 +2974,17 @@ void CPPHtmlDrawer::Tag_Tabulation(LPPOINT lpPoint, int nNum)
 void CPPHtmlDrawer::Draw(HDC hDC, LPCTSTR lpszHtml, LPPOINT lpPoint)
 {
 	//ENG: Preparing an output text
-	//RUS: Подготовка текста к выводу
+	//RUS: Подготовка текста ?выводу
 	SIZE size;
 	PrepareOutput(hDC, lpszHtml, &size);
 
 	//ENG: If output was disabled
-	//RUS: Если вывод запрещен
+	//RUS: Если выво?запрещен
 	if (!size.cx || !size.cy)
 		return;
 	
 	//ENG: Calculates an output area
-	//RUS: Подсчет области вывода
+	//RUS: Подсче?област?вывода
 	RECT rect;
 	rect.left = lpPoint->x;
 	rect.top = lpPoint->y;
@@ -3002,14 +2992,14 @@ void CPPHtmlDrawer::Draw(HDC hDC, LPCTSTR lpszHtml, LPPOINT lpPoint)
 	rect.bottom = rect.top + size.cy;
 	
 	//ENG: Output a prepared text
-	//RUS: Вывод подготовленного текста
+	//RUS: Выво?подготовленног?текста
 	DrawPreparedOutput(hDC, &rect);
 } //End Draw
 
 void CPPHtmlDrawer::PrepareOutput(HDC hDC, LPCTSTR lpszHtml, LPSIZE lpSize)
 {
 	//ENG: Copy initial parameters
-	//RUS: Копирование начальных параметров
+	//RUS: Копировани?начальны?параметров
 	m_hDC = hDC;
 
 	//ENG: Reset text justification
@@ -3024,17 +3014,17 @@ void CPPHtmlDrawer::PrepareOutput(HDC hDC, LPCTSTR lpszHtml, LPSIZE lpSize)
 	lpSize->cx = lpSize->cy = 0;
 	
 	//ENG: If prepared text wasn't empty then return
-	//RUS: Если подготовленный текст не пустой, то выход
+	//RUS: Если подготовленный текс?не пустой, то выхо?
 	if (!m_csHtmlText.IsEmpty())
 	{
 		//ENG: Sets a prepare mode
-		//RUS: Устанавливаем режим подготовки
+		//RUS: Устанавливае?режи?подготовки
 		m_nNumPass = MODE_FIRSTPASS;
 
 		m_arrTables.clear();
 
 		//ENG: Prepares to real output
-		//RUS: Подготовка к реальному выводу
+		//RUS: Подготовка ?реальном?выводу
 		DrawHtml(lpSize, &rect);
 
 		if (!lpSize->cx && !lpSize->cy)
@@ -3061,17 +3051,17 @@ void CPPHtmlDrawer::PrepareOutput(HDC hDC, LPCTSTR lpszHtml, LPSIZE lpSize)
 void CPPHtmlDrawer::DrawPreparedOutput(HDC hDC, LPCRECT lpRect)
 {
 	//ENG: If prepared text was empty then return
-	//RUS: Если подготовленный текст пустой, то выход
+	//RUS: Если подготовленный текс?пустой, то выхо?
 	if (m_csHtmlText.IsEmpty())
 		return;
 
 	//ENG: Copy initial parameters
-	//RUS: Копирование начальных параметров
+	//RUS: Копировани?начальны?параметров
 	m_hDC = hDC;
 	SIZE size = {0, 0};
 
 	//ENG: Sets a output mode
-	//RUS: Устанавливаем режим вывода
+	//RUS: Устанавливае?режи?вывода
 	m_nNumPass = MODE_DRAW;
 
 	RECT rect = *lpRect;
@@ -3079,7 +3069,7 @@ void CPPHtmlDrawer::DrawPreparedOutput(HDC hDC, LPCRECT lpRect)
 //		rect.right = rect.left + m_nMaxWidth;
 
 	//ENG: Real output the prepared string
-	//RUS: Вывод подготовленной строки
+	//RUS: Выво?подготовленной строки
 	DrawHtml(&size, &rect);
 } //End of DrawPreparedOutput
 
@@ -3221,12 +3211,12 @@ void CPPHtmlDrawer::SetImageList(UINT nIdBitmap, int cx, int cy, int nCount, COL
 void CPPHtmlDrawer::SetImageList(HBITMAP hBitmap, int cx, int cy, int nCount, COLORREF crMask /* = RGB(255, 0, 255) */)
 {
 	//ENG: Removes previously image list
-	//RUS: Удаляем предыдущий список изображений
+	//RUS: Удаляем предыдущий список изображени?
 	if (NULL != m_hImageList)
 		::DeleteObject(m_hImageList);
 
 	//ENG: If don't need to create a new image list
-	//RUS: Если не нужно создавать новый список изображений
+	//RUS: Если не нужн?создават?новы?список изображени?
 	if (NULL == hBitmap)
 		return;
 
@@ -3509,7 +3499,7 @@ void CPPHtmlDrawer::UnpackTextStyle(CPPString strStyle, _STRUCT_CHANGESTYLE & cs
 					if (m_bIsEnable)
 						cs.crText = GetStyleColor(strParameter, cs.crText);
 					else
-						cs.crText = GetColorByName("");
+						cs.crText = GetColorByName(_T(""));
 				}
 				else if (strName == _T("background-color"))
 				{
@@ -3536,7 +3526,7 @@ void CPPHtmlDrawer::UnpackTextStyle(CPPString strStyle, _STRUCT_CHANGESTYLE & cs
 					if (m_bIsEnable)
 						cs.crBorderLight = GetStyleColor(strParameter, cs.crBorderLight);
 					else
-						cs.crBorderLight = GetColorByName("");
+						cs.crBorderLight = GetColorByName(_T(""));
 					cs.crBorderDark = cs.crBorderLight;
 				}
 				else if ((strName == _T("border-width")) || (strName == _T("size")))
@@ -3921,10 +3911,10 @@ CPPString CPPHtmlDrawer::GetTagBody(CPPString & str, int & nIndex)
 {
 	CPPString sTagName = _T("");
 	//ENG: Search the tag's end 
-	//RUS: Ищем окончание тэга
+	//RUS: Ищем окончани?тэга
 	int nEndOfTag = str.Find(_T('>'), nIndex);
 	//ENG: The tag's end was found. Passes a tag's begin char ('<')
-	//RUS: Конец тэга найденю Пропускаем символ начала тэга
+	//RUS: Коне?тэга найден?Пропускаем символ начала тэга
 	nIndex++;
 	if (nEndOfTag > nIndex)
 	{
@@ -3932,7 +3922,7 @@ CPPString CPPHtmlDrawer::GetTagBody(CPPString & str, int & nIndex)
 		//RUS: Получаем полную строку тэга
 		sTagName = str.Mid(nIndex, nEndOfTag - nIndex);
 		//ENG: Jump to next char after the tag
-		//RUS: Перемещаемся на следующий за тэгом символ
+		//RUS: Перемещаем? на следующи?за тэго?символ
 		nIndex = nEndOfTag + 1;
 	} //if
 	return sTagName;
@@ -3954,7 +3944,7 @@ CPPString CPPHtmlDrawer::SplitTag(CPPString & sTag)
 	if (tch != _T('\0'))
 	{
 		//ENG: The separator was found. Splits a tag's body to his name and his parameteres 
-		//RUS: Разделитель найден. Разделяем тело тэга на имя и параметры
+		//RUS: Разделител?найден. Разделяем тело тэга на имя ?параметр?
 		sParam = sTag.Mid(nIndex);
 		sTag = sTag.Left(nIndex);
 		sParam.TrimLeft(_T(' '));
@@ -4247,7 +4237,7 @@ CPPString CPPHtmlDrawer::GetNameOfTag(CPPString & str, int & nIndex)
 SIZE CPPHtmlDrawer::GetTableDimensions(CPPString & sTable)
 {
 	//ENG: A table dimensions by default
-	//RUS: Размеры таблицы по умолчанию
+	//RUS: Размер?таблиц?по умолчани?
 	SIZE szTable = {0, 0};
 	int nIndex = 0;
 	int nCol = 0;
@@ -4258,11 +4248,11 @@ SIZE CPPHtmlDrawer::GetTableDimensions(CPPString & sTable)
 		if (SearchTag(sTable, nIndex, _T("tr")))
 		{
 			//ENG: Increment count of the rows
-			//RUS: Увеличиваем количество строк
+			//RUS: Увеличивае?количество стро?
 			szTable.cy++;
 
 			//ENG: Count of the columns in current row
-			//RUS: Количество колонок в текущей строке
+			//RUS: Количество колоно??текуще?строке
 			nCol = 0;
 			int nEndRow;
 			int nNewCell;
@@ -4270,7 +4260,7 @@ SIZE CPPHtmlDrawer::GetTableDimensions(CPPString & sTable)
 			{
 				nEndRow = nNewCell = nIndex;
 				//ENG: Search an end of the row or a begin of the cell
-				//RUS: Ищем конец строки или начало ячейки
+				//RUS: Ищем коне?строки ил?начало ячейк?
 				SearchTag(sTable, nEndRow, _T("/tr"));
 				SearchTag(sTable, nNewCell, _T("td"));
 				if (nNewCell < nEndRow)
@@ -4278,22 +4268,22 @@ SIZE CPPHtmlDrawer::GetTableDimensions(CPPString & sTable)
 					nIndex = nNewCell;
 
 					//ENG: Passes a tag body and get a properties of the tag
-					//RUS: Пропускаем тэг начала ячейки и получаем строку свойств тэга
+					//RUS: Пропускаем тэ?начала ячейк??получаем строку свойст?тэга
 					CPPString sTag;
 					SearchNextTag(sTable, sTag, nNewCell);
 					CPPString sProperties = SplitTag(sTag);
 
 					//ENG: Analyses a properties of the tag
-					//RUS: Анализируем свойства тэга
+					//RUS: Анализируе?свойства тэга
 					STRUCT_CHANGESTYLE style;
 					SIZE szSpan = AnalyseCellParam(sProperties, style, TRUE);
 
 					//ENG: Increment count of the cells
-					//RUS: Увеличиваем количество ячеек в строке
+					//RUS: Увеличивае?количество ячеек ?строке
 					nCol += szSpan.cx;
 
 					//ENG: Jump to end of the cell
-					//RUS: Переходим на конец ячейки
+					//RUS: Переходи?на коне?ячейк?
 					SearchEndOfCell(sTable, nIndex);
 				} //if
 			} while (nNewCell < nEndRow);
@@ -4440,11 +4430,11 @@ SIZE CPPHtmlDrawer::AnalyseCellParam(CPPString & sProperties, _STRUCT_CHANGESTYL
 	while (i < sProperties.GetLength())
 	{
 		//ENG: Searching a parameters of a tag
-		//RUS: Поиск параметров тэга
+		//RUS: Поис?параметров тэга
 		sValue = GetNextProperty(sProperties, i, sParameter);
 
 		//ENG: Processes the specific parameters for <table> tag.
-		//RUS: Обрабатываем специфические для тэга <table> параметры
+		//RUS: Обрабатываем специфически?для тэга <table> параметр?
 		if(bTable)
 		{
 			if (sParameter == _T("cellpadding"))
@@ -4488,7 +4478,7 @@ SIZE CPPHtmlDrawer::AnalyseCellParam(CPPString & sProperties, _STRUCT_CHANGESTYL
 			if (m_bIsEnable)
 				cs.crBorderLight = GetStyleColor(sValue, cs.crBorderLight);
 			else
-				cs.crBorderLight = GetColorByName("");
+				cs.crBorderLight = GetColorByName(_T(""));
 			cs.crBorderDark = cs.crBorderLight;
 		}
 		else if (sParameter == _T("bordercolorlight"))
@@ -4496,14 +4486,14 @@ SIZE CPPHtmlDrawer::AnalyseCellParam(CPPString & sProperties, _STRUCT_CHANGESTYL
 			if (m_bIsEnable)
 				cs.crBorderLight = GetStyleColor(sValue, cs.crBorderLight);
 			else
-				cs.crBorderLight = GetColorByName("");
+				cs.crBorderLight = GetColorByName(_T(""));
 		}
 		else if (sParameter == _T("bordercolordark"))
 		{
 			if (m_bIsEnable)
 				cs.crBorderDark = GetStyleColor(sValue, cs.crBorderDark);
 			else
-				cs.crBorderDark = GetColorByName("");
+				cs.crBorderDark = GetColorByName(_T(""));
 		}
 		else if (sParameter == _T("bgcolor"))
 		{
@@ -4560,7 +4550,7 @@ SIZE CPPHtmlDrawer::AnalyseCellParam(CPPString & sProperties, _STRUCT_CHANGESTYL
 	}	//if
 
 	//ENG: 
-	//RUS: Для ячеек ширина всегда равна 1
+	//RUS: Для ячеек ширина всегда равн?1
 	if (!bTable && cs.nBorderWidth)
 		cs.nBorderWidth = 1;
 
@@ -4587,7 +4577,7 @@ void CPPHtmlDrawer::AnalyseImageParam(CPPString & sProperties, _STRUCT_IMAGE & s
 	while (i < sProperties.GetLength())
 	{
 		//ENG: Searching a parameters of a tag
-		//RUS: Поиск параметров тэга
+		//RUS: Поис?параметров тэга
 		sValue = GetNextProperty(sProperties, i, sParameter);
 
 //		sParameter = SearchPropertyOfTag(sProperties, i);
@@ -4955,10 +4945,9 @@ CPPString CPPHtmlDrawer::GetWordWrap(CPPString & str, int nMaxSize, int & nRealS
 	{
 		if (nMaxSize == nRealSize)
 		{
-			//RUS: Разрывов в строке не обнаружено, поэтому будем разбивать строку 
-			//     по символам, а не по словам
 			sz.cx = 0;
-			for (int i = 1; i < str.GetLength(); i++)
+			int i = 1;
+			for ( ; i < str.GetLength(); i++)
 			{
 				::GetTextExtentPoint32(m_hDC, str, i + 1, &sz);
 				if (sz.cx > nRealSize)
@@ -4971,15 +4960,13 @@ CPPString CPPHtmlDrawer::GetWordWrap(CPPString & str, int nMaxSize, int & nRealS
 				} //if
 			} //for
 			::GetTextExtentPoint32(m_hDC, str, i, &sz);
-			//RUS: Невозможно разбить строку, выводим целиком
 			sResult = str;
 			str.Empty();
 		}
 		else
 		{
-			//RUS: В отставшееся место текущей строки не влазит ни одного слова
 			sz.cx = 0;
-		} //if
+		}
 	}
 	else 
 	{
