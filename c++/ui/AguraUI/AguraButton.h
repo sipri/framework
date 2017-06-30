@@ -12,8 +12,6 @@ public:
 	BOOL	m_bIsCaptionFile;
 	BOOL	m_bHover;
 	int		m_iImagePosition;
-// 	POINT	m_ptBitmapOrg;
-// 	POINT	m_ptIconOrg;
 	POINT	m_ptPressedOffset;
 
 	CString m_strNormalPath;
@@ -30,7 +28,6 @@ public:
 	COLORREF m_clrText;
 
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	DWORD SetDefaultColors(BOOL bRepaint = TRUE);
 
 	void setCaptionImage(int iPosition, CString strCaption);
@@ -44,7 +41,6 @@ public:
 	afx_msg void OnMouseLeave();
 
 protected:
-//	BOOL		m_bMouseOnButton;				// Is mouse over the button?
 	BOOL		m_bIsPressed;					// Is button pressed?
 	BOOL		m_bIsFocused;					// Is button focused?
 	BOOL		m_bIsDisabled;					// Is button disabled?
@@ -61,7 +57,5 @@ private:
 	LRESULT OnSetStyle(WPARAM wParam, LPARAM lParam);
 	virtual DWORD DrawBackground(CDC* pDC, CRect* pRect);
 	
-	/*LDRA_INSPECTED 183 S */
-	/*LDRA_INSPECTED 326 S */
 	DECLARE_MESSAGE_MAP() //매크로 부분으로 예외처리 
 };
