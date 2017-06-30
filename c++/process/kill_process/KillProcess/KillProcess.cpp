@@ -70,13 +70,15 @@ BOOL KillProcess(LPCTSTR pszProcName)
 			hProcess = OpenProcess(PROCESS_TERMINATE, 0, pe32.th32ProcessID);
 			if (NULL == hProcess)
 			{
-				_tprintf(_T("Failed to OpenProcess: %s"), GetLastErrorMessage(GetLastError()).c_str());
+				DWORD dwLastError = GetLastError();
+				_tprintf(_T("Failed to OpenProcess: (%d) %s"), dwLastError, GetLastErrorMessage(dwLastError).c_str());
 				return FALSE;
 			}
 
 			if (FALSE == TerminateProcess(hProcess, 0))
 			{
-				_tprintf(_T("Failed to TerminateProcess, %s"), GetLastErrorMessage(GetLastError()).c_str());
+				DWORD dwLastError = GetLastError();
+				_tprintf(_T("Failed to TerminateProcess, (%d) %s"), dwLastError, GetLastErrorMessage(dwLastError).c_str());
 				return FALSE;
 			}
 
@@ -90,7 +92,8 @@ BOOL KillProcess(LPCTSTR pszProcName)
 				_tprintf(_T("Failed to WaitForSingleObject: WAIT_TIMEOUT"));
 				return FALSE;
 			case WAIT_FAILED:
-				_tprintf(_T("Failed to WaitForSingleObject: WAIT_FAILED"));
+				DWORD dwLastError = GetLastError();
+				_tprintf(_T("Failed to WaitForSingleObject: WAIT_FAILED: (%d) %s"), dwLastError, GetLastErrorMessage(dwLastError).c_str());
 				return FALSE;
 			}
 		}
