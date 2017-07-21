@@ -1,0 +1,5 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/c++/exploit/inject_dll/InjectDll/Release/InjectDll.tlog
