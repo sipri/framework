@@ -1,4 +1,5 @@
-﻿#Numpad1::Run "D:\1. Document"
+﻿#Persistent
+#Numpad1::Run "D:\1. Document"
 #Numpad2::Run "D:\2. Source"
 #Numpad3::Run "D:\3. Test"
 #Numpad4::Run "D:\4. Release"
