@@ -29,11 +29,15 @@ CAguraEdit::~CAguraEdit()
  ************************************************************/
 BOOL CAguraEdit::PreTranslateMessage(MSG* pMsg)
 {
-	if (pMsg->message == WM_KEYUP )
+	if (pMsg->message == WM_KEYDOWN)
 	{
-		if ((LOWORD(pMsg->wParam) & VK_CONTROL) == VK_CONTROL)
+		if (GetKeyState(VK_CONTROL) < 0)
 		{
-			SetSel(0, -1);
+			if (pMsg->wParam == 'A')
+			{
+				SetSel(0, -1);
+				return TRUE;
+			}
 		}
 	}
 

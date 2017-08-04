@@ -9,7 +9,7 @@ public:
 	// Constructor
 	CAguraEdit();
 	// Destructor
-	virtual ~CAguraEditBox();
+	virtual ~CAguraEdit();
 
 	// Pre-Translate Message
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
