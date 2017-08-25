@@ -1,16 +1,13 @@
 #pragma once
 
-#include <GdiPlus.h>
-#include <comutil.h>
-
-#pragma comment(lib, "gdiplus")
-#pragma comment(lib, "comsuppw.lib")
-
-using namespace Gdiplus;
-
+/************************************************************
+ * Agura Application
+ ************************************************************/
 class CAguraApplication : public CWinApp
 {
 public:
+	// Constructor
 	CAguraApplication();
+	// Destructor
 	~CAguraApplication();
 };
