@@ -8,11 +8,11 @@ public:
 	// Constructor
 	CAguraGraphics(IN HDC hdc);
 	// Constructor
-    CAguraGraphics(IN HDC hdc, IN HANDLE hdevice);
+	CAguraGraphics(IN HDC hdc, IN HANDLE hdevice);
 	// Constructor
-    CAguraGraphics(IN HWND hwnd, IN BOOL icm = FALSE);
+	CAguraGraphics(IN HWND hwnd, IN BOOL icm = FALSE);
 	// Constructor
-    CAguraGraphics(IN Gdiplus::Image* image);
+	CAguraGraphics(IN Gdiplus::Image* image);
 	// Destructor
 	~CAguraGraphics();
 	// Fill Round Rectangle
