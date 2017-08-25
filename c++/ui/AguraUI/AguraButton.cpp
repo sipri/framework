@@ -54,8 +54,10 @@ void CAguraButton::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		lpDrawItemStruct->rcItem.top,
 		lpDrawItemStruct->rcItem.right - lpDrawItemStruct->rcItem.left,
 		lpDrawItemStruct->rcItem.bottom - lpDrawItemStruct->rcItem.top);
-
 	g.FillRoundRectangle(&fillBrush, fillRect, 5);
+
+	Gdiplus::Pen fillPen(Gdiplus::Color(46, 109, 164));
+	g.DrawRoundRectangle(&fillPen, fillRect, 5);
 
 	Gdiplus::RectF textRect((Gdiplus::REAL)lpDrawItemStruct->rcItem.left,
 		(Gdiplus::REAL)lpDrawItemStruct->rcItem.top,

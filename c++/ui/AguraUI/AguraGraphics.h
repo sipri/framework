@@ -15,6 +15,8 @@ public:
 	CAguraGraphics(IN Gdiplus::Image* image);
 	// Destructor
 	~CAguraGraphics();
+	// Draw Round Rectangle
+	Gdiplus::Status DrawRoundRectangle(IN const Gdiplus::Pen* pen, IN const Gdiplus::Rect& rect, int diameter);
 	// Fill Round Rectangle
 	Gdiplus::Status FillRoundRectangle(IN const Gdiplus::Brush* brush, IN const Gdiplus::Rect& rect, int diameter);
 };

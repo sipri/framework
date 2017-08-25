@@ -64,6 +64,60 @@ CAguraGraphics::~CAguraGraphics()
 }
 
 /************************************************************
+ *	@brief		Draw Round Rectangle
+ *	@param[in]	pen				Pen
+ *	@param[in]	rect			Rect
+ *	@param[in]	diameter		Diameter
+ *	@retval		None
+ ************************************************************/
+Gdiplus::Status CAguraGraphics::DrawRoundRectangle(IN const Gdiplus::Pen* pen, IN const Gdiplus::Rect& rect, int diameter)
+{
+	Gdiplus::GraphicsPath path;
+	Gdiplus::Rect fillRect = rect;
+
+    // diameter can't exceed width or height
+    if (diameter > fillRect.Width)
+		diameter = fillRect.Width;
+    if (diameter > fillRect.Height)
+		diameter = fillRect.Height;
+
+    // define a corner 
+    Gdiplus::Rect Corner(rect.X, fillRect.Y, diameter, diameter);
+
+    // begin path
+    path.Reset();
+
+    // top left
+    path.AddArc(Corner, 180, 90);    
+
+    // tweak needed for fillRect.dius of 10 (dia of 20)
+    if (diameter == 20)
+    {
+        Corner.Width += 1; 
+        Corner.Height += 1; 
+        fillRect.Width -=1;
+		fillRect.Height -= 1;
+    }
+
+    // top fillRect.ght
+    Corner.X += (rect.Width - diameter - 1);
+    path.AddArc(Corner, 270, 90);    
+    
+    // bottom fillRect.ght
+    Corner.Y += (rect.Height - diameter - 1);
+    path.AddArc(Corner, 0, 90);    
+    
+    // bottom left
+    Corner.X -= (rect.Width - diameter - 1);
+    path.AddArc(Corner, 90, 90);
+
+    // end path
+    path.CloseFigure();
+
+	return DrawPath(pen, &path);
+}
+
+/************************************************************
  *	@brief		Fill Round Rectangle
  *	@param[in]	brush			Brush
  *	@param[in]	rect			Rect
