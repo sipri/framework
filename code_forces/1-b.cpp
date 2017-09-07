@@ -1,10 +1,7 @@
-// 1-b.cpp : 콘솔 응용 프로그램에 대한 진입점을 정의합니다.
-//
-
-#include "stdafx.h"
-
 #include <stdio.h>
-#include <string>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
 
 using namespace std;
 
@@ -112,13 +109,13 @@ void convert(char* cell_str)
 		char alpha_str[32];
 		memset(alpha_str, 0, sizeof(alpha_str));
 		conver_num_to_alpha(cell_token[3], alpha_str);
-		printf("%s%s", alpha_str, cell_token[1]);
+		printf("%s%s\n", alpha_str, cell_token[1]);
 	}
 	else
 	{
 		char num_str[32];
 		conver_alpha_to_num(cell_token[0], num_str);
-		printf("R%sC%s", cell_token[1], num_str);
+		printf("R%sC%s\n", cell_token[1], num_str);
 	}
 }
 
