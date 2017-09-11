@@ -7,12 +7,6 @@
 #define new DEBUG_NEW
 #endif
 
-
-#define WM_MOUSEMOVE_ON_SCREEN	(WM_USER + 100)
-
-HWND CWinControllerDlg::m_hWnd;
-HHOOK CWinControllerDlg::m_hMouseHook;
-
 class CAboutDlg : public CDialogEx
 {
 public:
@@ -23,7 +17,7 @@ public:
 #endif
 
 	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX);
 
 protected:
 	DECLARE_MESSAGE_MAP()
@@ -41,16 +35,12 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 }
 
-
-
 BEGIN_MESSAGE_MAP(CWinControllerDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_MESSAGE(WM_MOUSEMOVE_ON_SCREEN, &CWinControllerDlg::OnMouseMoveOnScreen)
 	ON_WM_TIMER()
 END_MESSAGE_MAP()
-
 
 CWinControllerDlg::CWinControllerDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_WINCONTROLLER_DIALOG, pParent)
@@ -62,9 +52,10 @@ void CWinControllerDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_WCNT_MOUSE_POS, m_MousePos);
-	DDX_Control(pDX, IDC_WCNT_HWND, m_Hwnd);
+	DDX_Control(pDX, IDC_WCNT_WINDOW_HWND, m_WindowHwnd);
+	DDX_Control(pDX, IDC_WCNT_WINDOW_POS, m_WindowPos);
+	DDX_Control(pDX, IDC_WCNT_WINDOW_SIZE, m_WindowSize);
 }
-
 
 BOOL CWinControllerDlg::OnInitDialog()
 {
@@ -87,16 +78,13 @@ BOOL CWinControllerDlg::OnInitDialog()
 		}
 	}
 
-	SetIcon(m_hIcon, TRUE);			// Set big icon
-	SetIcon(m_hIcon, FALSE);		// Set small icon
+	SetIcon(m_hIcon, TRUE);
+	SetIcon(m_hIcon, FALSE);
 
 	m_hWnd = GetSafeHwnd();
-	//m_hMouseHook = SetWindowsHookEx(WH_MOUSE, MouseProc, NULL, GetCurrentThreadId());
-
 	SetTimer(0, 100, NULL);
 
-
-	return TRUE;  // return TRUE  unless you set the focus to a control
+	return TRUE;
 }
 
 void CWinControllerDlg::OnSysCommand(UINT nID, LPARAM lParam)
@@ -134,6 +122,27 @@ void CWinControllerDlg::OnPaint()
 	else
 	{
 		CDialogEx::OnPaint();
+
+		CDC* pScreenDC = CDC::FromHandle(::GetDC(NULL));
+		CDC MemDC;
+		MemDC.CreateCompatibleDC(pScreenDC);
+
+		CBitmap MemBMP;
+		MemBMP.CreateCompatibleBitmap(pScreenDC, m_WindowRect.Width(), m_WindowRect.Height());
+		CBitmap* pOldBMP = MemDC.SelectObject(&MemBMP);
+
+		CPen pen(PS_SOLID, 2, RGB(255, 0, 0));
+		CPen* pOldPen = MemDC.SelectObject(&pen);
+		MemDC.Rectangle(&m_WindowRect);
+		MemDC.SelectObject(pOldPen);
+
+		pScreenDC->BitBlt(m_WindowRect.left, m_WindowRect.top, m_WindowRect.Width(), m_WindowRect.Height(),
+			&MemDC, m_WindowRect.left, m_WindowRect.top, SRCCOPY);
+		MemDC.SelectObject(pOldBMP);
+
+		MemBMP.DeleteObject();
+		MemDC.DeleteDC();
+		ReleaseDC(pScreenDC);
 	}
 }
 
@@ -141,42 +150,6 @@ HCURSOR CWinControllerDlg::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
 }
-
-LRESULT CALLBACK CWinControllerDlg::MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
-{
-//	if (wParam == WM_MOUSEMOVE)
-//	{
-//		::PostMessage(m_hWnd, WM_MOUSEMOVE_ON_SCREEN, NULL, NULL);
-//	}
-
-    return CallNextHookEx(m_hMouseHook, nCode, wParam, lParam);
-}
-
-LRESULT CWinControllerDlg::OnMouseMoveOnScreen(WPARAM wParam, LPARAM lParam)
-{
-	POINT ptCursor;
-	GetCursorPos(&ptCursor);
-
-	CString strPos;
-	strPos.Format(_T("(%d, %d)"), ptCursor.x, ptCursor.y);
-	m_MousePos.SetWindowText(strPos);
-
-	POINT pt;
-	pt.x = ptCursor.x;
-	pt.y = ptCursor.y;
-
-	HWND hWnd = NULL;
-	CWnd* pWnd = WindowFromPoint(pt);
-	if (pWnd != NULL)
-		hWnd = pWnd->GetSafeHwnd();
-
-	CString strHwnd;
-	strHwnd.Format(_T("0x%08x"), hWnd);
-	m_Hwnd.SetWindowText(strHwnd);
-
-	return 0;
-}
-
 
 void CWinControllerDlg::OnTimer(UINT_PTR nIDEvent)
 {
@@ -196,9 +169,21 @@ void CWinControllerDlg::OnTimer(UINT_PTR nIDEvent)
 	if (pWnd != NULL)
 		hWnd = pWnd->GetSafeHwnd();
 
-	CString strHwnd;
-	strHwnd.Format(_T("0x%08x"), hWnd);
-	m_Hwnd.SetWindowText(strHwnd);
+	CString strWindowHwnd;
+	strWindowHwnd.Format(_T("0x%08x"), hWnd);
+	m_WindowHwnd.SetWindowText(strWindowHwnd);
+
+	::GetWindowRect(hWnd, &m_WindowRect);
+
+	CString strWindowPos;
+	strWindowPos.Format(_T("(%d, %d)"), m_WindowRect.left, m_WindowRect.top);
+	m_WindowPos.SetWindowText(strWindowPos);
+
+	CString strWindowSize;
+	strWindowSize.Format(_T("(%d, %d)"), m_WindowRect.Width(), m_WindowRect.Height());
+	m_WindowSize.SetWindowText(strWindowSize);
+
+	Invalidate(FALSE);
 
 	CDialogEx::OnTimer(nIDEvent);
 }
